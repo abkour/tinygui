@@ -12,5 +12,13 @@ The purpose of this library is to provide a minimalist gui experience for graphi
 	6. Miscellaneous UI elements (progress bars, sliders, scroll bars, text boxes etc.)
 	7. I/O
 
-## Design
+## Elements
+
+There are only a few core elements I want to be implemented
+
+### Progress bar
+
+### Sliders
+
+### Text boxes
 
