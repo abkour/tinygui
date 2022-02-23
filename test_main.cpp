@@ -33,8 +33,9 @@ int main() {
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-		Shader shaderProgram("../../impl/gui_shader.glsl.vs", "../../impl/gui_shader.glsl.vs");
-		shaderProgram.bind();
+		Shader shaderProgram(	"C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.vs", 
+								"C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.fs");
+		shaderProgram.bind(); 
 
 		while (!glfwWindowShouldClose(window.window)) {
 			glClearColor(0.f, 0.f, 0.f, 0.f);

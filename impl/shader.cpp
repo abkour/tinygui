@@ -2,10 +2,9 @@
 #include "shader.hpp"
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
-
-#include <iostream>
 
 static bool isShaderCompilationValid(GLuint shaderID, GLenum shaderType, std::string& errorMessage);
 static bool isProgramLinkageValid(GLuint programID, std::string& errorMessage);
@@ -16,8 +15,8 @@ Shader::Shader(const char* vertexshaderPath, const char* fragmentshaderPath) {
 	//
 	// Read the vertex shader code into a c string
 	std::ifstream vsFile(vertexshaderPath, std::ios::binary);
-	if (!vsFile.fail()) {
-		throw std::runtime_error("File missing. Check the existence of \"gui_shader.glsl.fs\" in folder ..\impl");
+	if (vsFile.fail()) {
+		throw std::runtime_error("File missing. Check the existence of \"gui_shader.glsl.vs\" in folder ..\impl");
 	}
 	
 	std::ostringstream vsFileStream;
@@ -30,7 +29,7 @@ Shader::Shader(const char* vertexshaderPath, const char* fragmentshaderPath) {
 	//
 	// Read the fragment shader code into a c string
 	std::ifstream fsFile(fragmentshaderPath, std::ios::binary);
-	if (!fsFile.fail()) {
+	if (fsFile.fail()) {
 		throw std::runtime_error("File missing. Check the existence of \"gui_shader.glsl.vs\" in folder ..\impl");
 	}
 
@@ -41,10 +40,11 @@ Shader::Shader(const char* vertexshaderPath, const char* fragmentshaderPath) {
 	std::string fsFileString = std::move(fsFileStream.str());
 	const char* fsFileCString = fsFileString.c_str();
 
-
 	GLuint vertexShaderID = 0;
 	GLuint fragmentShaderID = 0;
-
+	
+	//
+	// Compile shader
 	glShaderSource(vertexShaderID, 1, &vsFileCString, NULL);
 	glShaderSource(fragmentShaderID, 1, &fsFileCString, NULL);
 
@@ -89,10 +89,10 @@ void Shader::bind() {
 }
 
 static bool isShaderCompilationValid(GLuint shaderID, GLenum shaderType, std::string& errorMessage) {
-	char errorLog[512];
 	int success;
 	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
 	if (success != GL_TRUE) {
+		char errorLog[512];
 		glGetShaderInfoLog(shaderID, 512, NULL, errorLog);
 		switch (shaderType) {
 		case GL_VERTEX_SHADER:
@@ -105,7 +105,7 @@ static bool isShaderCompilationValid(GLuint shaderID, GLenum shaderType, std::st
 			errorMessage += "INCORRECT_SHADER_SPECIFIED::";
 			break;
 		}
-		std::cout << "errorMesage: " << errorLog << '\n';
+		std::cout << "errorMessage: " << errorLog << '\n';
 		errorMessage = errorMessage + "FAILED_COMPILATION. ERROR MESSAGE: " + errorLog;
 		return false;
 	}
@@ -113,10 +113,10 @@ static bool isShaderCompilationValid(GLuint shaderID, GLenum shaderType, std::st
 }
 
 static bool isProgramLinkageValid(GLuint programID, std::string& errorMessage) {
-	char errorLog[512];
 	int success;
 	glGetProgramiv(programID, GL_LINK_STATUS, &success);
 	if (success != GL_TRUE) {
+		char errorLog[512];
 		glGetShaderInfoLog(programID, 512, NULL, errorLog);
 		errorMessage += "Program linkage error. Error message: " + std::string(errorLog);
 		return false;
