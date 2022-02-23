@@ -40,11 +40,12 @@ Shader::Shader(const char* vertexshaderPath, const char* fragmentshaderPath) {
 	std::string fsFileString = std::move(fsFileStream.str());
 	const char* fsFileCString = fsFileString.c_str();
 
-	GLuint vertexShaderID = 0;
-	GLuint fragmentShaderID = 0;
 	
 	//
 	// Compile shader
+	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
 	glShaderSource(vertexShaderID, 1, &vsFileCString, NULL);
 	glShaderSource(fragmentShaderID, 1, &fsFileCString, NULL);
 
@@ -66,6 +67,8 @@ Shader::Shader(const char* vertexshaderPath, const char* fragmentshaderPath) {
 	programID = glCreateProgram();
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
+
+	glLinkProgram(programID);
 
 	std::string linkageStatusMessage;
 	if (!isProgramLinkageValid(programID, linkageStatusMessage)) {

@@ -15,7 +15,7 @@ int main() {
 		float quad[] =
 		{
 			0.f, 0.f,
-			0.f, 1.f,
+			1.f, 0.f,
 			1.f, 1.f,
 
 			0.f, 0.f,
@@ -46,7 +46,7 @@ int main() {
 			glfwSwapBuffers(window.window);
 			glfwPollEvents();
 
-			if (!glfwWindowShouldClose(window.window)) {
+			if (glfwGetKey(window.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 				glfwSetWindowShouldClose(window.window, GLFW_TRUE);
 			}
 		}
