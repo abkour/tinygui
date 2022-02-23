@@ -1,0 +1,48 @@
+Issues:
+
+1. Updating GUI
+
+	Option A: Render all elements inside the same shader
+	Option B: Render elements in unique shaders
+	Option C: Discard vertices in vertex shader that need no updating
+
+
+Option A)
+Becomes a problem for complex UI's. Especially wasteful when only few objects need updating
+
+Option B)
+Requires a lot of state changes, which are notoriously slow, especially for shader programs.
+
+Option C)
+Probably the best option. Need to store one bit per triangle quad to identify need for update.
+Fragment shader is relatively simple, we bind the correct texture to the active texture unit,
+when an update is necessary.
+
+Conclusion: I will go with option C
+
+################################################################################################################
+
+2. Layered objects
+
+Problems:
+
+	1) Identifying which object is on top of another
+	2) Rendering objects in a layer specific way
+	3) Selection of objects on cursor hover
+
+Data:
+	
+	Set of vertices, exclusively make up quads.
+
+
+Problem 1) Specifying the layer an object lies on
+
+	Option A: Z-value (smaller means closer)
+	Option B: Data structure (i.e linked list where root is bottom-most object)
+
+Problem 2) Identifying which object is on top of another
+	
+	Option A: Perform overlap test between two rectangles. If they overlap compare z-values
+	Option B: Follow linked list or tree and the solution follows naturally
+		Option B.1: Moving objects means performing a query on all objects 
+
