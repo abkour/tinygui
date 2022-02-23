@@ -10,7 +10,7 @@ struct Window {
 	Window(uint32_t resx, uint32_t resy, const char *windowTitle);
 
 
-	GLFWwindow* window;
+	GLFWwindow* window = nullptr;
 };
 
 }

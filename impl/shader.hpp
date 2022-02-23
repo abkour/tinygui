@@ -6,7 +6,7 @@ namespace tinygui {
 
 struct Shader {
 
-	Shader(std::string_view& vertexshaderPath, std::string_view& fragmentshaderPath);
+	Shader(const char* vertexshaderPath, const char* fragmentshaderPath);
 	~Shader();
 
 	void bind();
