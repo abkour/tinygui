@@ -11,4 +11,8 @@ Point2::Point2(float px, float py)
 	, y(py)
 {}
 
+std::ostream& operator<<(std::ostream& os, const Point2& point) {
+	return os << point.x << ", " << point.y;
+}
+
 }
