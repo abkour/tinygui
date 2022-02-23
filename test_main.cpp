@@ -1,4 +1,6 @@
 #include "include/tinygui.hpp"
+#include "test/window.hpp"
+#include "impl/shader.hpp"
 
 #include <iostream>
 
