@@ -5,33 +5,34 @@
 #include <iostream>
 
 int main() {
-
 	try {
 		using namespace tinygui;
 
 		Window window(1920, 1080, "tinygui");
 		glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-		float quad[] =
-		{
-			0.f, 0.f,
-			1.f, 0.f,
-			1.f, 1.f,
-
-			0.f, 0.f,
-			1.f, 1.f,
-			0.f, 1.f
-		};
+		float quad[12];
+		int id[6];
+		Rectangle rect(Point2(-0.5f, -0.5f), Point2(0.5f, 0.5f));
+		rect.makeQuad(quad);
+		
+		for (int i = 0; i < 6; ++i) {
+			id[i] = 2;
+		}
 
 		GLuint vao, vbo;
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quad) + sizeof(id), NULL, GL_STATIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(quad), quad);
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(quad), sizeof(id), id);
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribIPointer(1, 1, GL_INT, sizeof(int), reinterpret_cast<void*>(sizeof(quad)));
 
 		Shader shaderProgram(	"C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.vs", 
 								"C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.fs");
@@ -60,5 +61,4 @@ int main() {
 	catch (...) {
 		std::cout << "Unexpected error somewhere!\n";
 	}
-
 }

@@ -67,7 +67,7 @@ Shader::Shader(const char* vertexshaderPath, const char* fragmentshaderPath) {
 	programID = glCreateProgram();
 	glAttachShader(programID, vertexShaderID);
 	glAttachShader(programID, fragmentShaderID);
-
+	
 	glLinkProgram(programID);
 
 	std::string linkageStatusMessage;
@@ -114,7 +114,6 @@ static bool isShaderCompilationValid(GLuint shaderID, GLenum shaderType, std::st
 	}
 	return true;
 }
-
 static bool isProgramLinkageValid(GLuint programID, std::string& errorMessage) {
 	int success;
 	glGetProgramiv(programID, GL_LINK_STATUS, &success);
