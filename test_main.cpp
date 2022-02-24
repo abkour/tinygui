@@ -9,7 +9,8 @@ int main() {
 		using namespace tinygui;
 
 		Window window(1920, 1080, "tinygui");
-		glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		window.enableCursorCallback();
 
 		float quad[12];
 		int id[6];
@@ -41,6 +42,12 @@ int main() {
 		while (!glfwWindowShouldClose(window.window)) {
 			glClearColor(0.f, 0.f, 0.f, 0.f);
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			auto xoff = window.getXoffset();
+			auto yoff = window.getYoffset();
+			if (xoff != 0.f || yoff != 0.f) {
+				
+			}
 
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
