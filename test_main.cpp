@@ -8,7 +8,9 @@ int main() {
 	try {
 		using namespace tinygui;
 
-		Window window(1920, 1080, "tinygui");
+		Point2 screen_resolution(1920, 1080);
+
+		Window window(screen_resolution.x, screen_resolution.y, "tinygui");
 		glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		window.enableCursorCallback();
 
@@ -35,9 +37,21 @@ int main() {
 		glEnableVertexAttribArray(1);
 		glVertexAttribIPointer(1, 1, GL_INT, sizeof(int), reinterpret_cast<void*>(sizeof(quad)));
 
+		int identified_rectangle = 0;
+
+		GLuint ssbo;
+		glGenBuffers(1, &ssbo);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), &identified_rectangle, GL_STATIC_COPY);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
+
 		Shader shaderProgram(	"C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.vs", 
 								"C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.fs");
 		shaderProgram.bind(); 
+		
+		// Upload initial cursor position
+		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorX"), window.getXpos());
+		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorY"), window.getYpos());
 
 		while (!glfwWindowShouldClose(window.window)) {
 			glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -46,10 +60,18 @@ int main() {
 			auto xoff = window.getXoffset();
 			auto yoff = window.getYoffset();
 			if (xoff != 0.f || yoff != 0.f) {
-				
+				// Cursor position changed, update uniform
+				glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorX"), window.getXpos());
+				glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorY"), window.getYpos());
 			}
 
 			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			if (xoff != 0.f || yoff != 0.f) {
+				glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &identified_rectangle);
+				std::cout << "Identified rectangle: " << identified_rectangle << '\n';
+				window.resetCursorOffset();
+			}
 
 			glfwSwapBuffers(window.window);
 			glfwPollEvents();
