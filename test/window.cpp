@@ -43,5 +43,54 @@ Window::Window(uint32_t resx, uint32_t resy, const char* windowTitle) {
 	}
 }
 
+struct Cursor {
+
+	Cursor(float xpos, float ypos)
+		: xpos(xpos)
+		, ypos(ypos)
+		, xoff(0.f)
+		, yoff(0.f)
+	{}
+
+	float xpos;
+	float ypos;
+	float xoff;
+	float yoff;
+
+	bool initialEntry = true;
+};
+
+static Cursor uniqueCursor(0.f, 0.f);
+
+void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
+	if (uniqueCursor.initialEntry) {
+		uniqueCursor.xpos = xpos;
+		uniqueCursor.ypos = ypos;
+		uniqueCursor.initialEntry = false;
+	}
+
+	uniqueCursor.xoff = xpos - uniqueCursor.xpos;
+	uniqueCursor.yoff = uniqueCursor.ypos - ypos;
+	uniqueCursor.xpos = xpos;
+	uniqueCursor.ypos = ypos;
+}
+
+void Window::enableCursorCallback() const {
+	glfwSetCursorPosCallback(window, cursorPositionCallback);
+}
+
+float Window::getXoffset() const {
+	return uniqueCursor.xoff;
+}
+
+float Window::getYoffset() const {
+	return uniqueCursor.yoff;
+}
+
+void Window::resetCursorOffset() const {
+	uniqueCursor.xoff = 0.f;
+	uniqueCursor.yoff = 0.f;
+}
+
 
 }
