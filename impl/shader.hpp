@@ -10,6 +10,9 @@ struct Shader {
 	~Shader();
 
 	void bind();
+	GLuint id() const {
+		return programID;
+	}
 
 private:
 
