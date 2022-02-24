@@ -53,6 +53,8 @@ int main() {
 		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorX"), window.getXpos());
 		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorY"), window.getYpos());
 
+		bool cursorMoved = false;
+
 		while (!glfwWindowShouldClose(window.window)) {
 			glClearColor(0.f, 0.f, 0.f, 0.f);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -63,14 +65,18 @@ int main() {
 				// Cursor position changed, update uniform
 				glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorX"), window.getXpos());
 				glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorY"), window.getYpos());
+				window.resetCursorOffset();
+				cursorMoved = true;
 			}
 
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
-			if (xoff != 0.f || yoff != 0.f) {
+			if (cursorMoved) {
 				glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &identified_rectangle);
 				std::cout << "Identified rectangle: " << identified_rectangle << '\n';
-				window.resetCursorOffset();
+				identified_rectangle = 0;
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &identified_rectangle);
+				cursorMoved = false;
 			}
 
 			glfwSwapBuffers(window.window);
