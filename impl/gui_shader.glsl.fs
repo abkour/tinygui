@@ -22,11 +22,7 @@ uniform float cursorY;
 
 void main() {
     if(vec2(cursorX, cursorY) + vec2(0.5) == gl_FragCoord.xy) {
-        if(rect_id == 2) {
-            idOfRectangle = 42;
-        } else {
-            idOfRectangle = 0;
-        }
+         idOfRectangle = rect_id;
     }
     FragmentColor = vec4(colors[rect_id], 1.f);
 }

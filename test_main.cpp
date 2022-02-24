@@ -18,10 +18,7 @@ int main() {
 		int id[6];
 		Rectangle rect(Point2(-0.5f, -0.5f), Point2(0.5f, 0.5f));
 		rect.makeQuad(quad);
-		
-		for (int i = 0; i < 6; ++i) {
-			id[i] = 2;
-		}
+		std::fill_n(id, 6, 1);
 
 		GLuint vao, vbo;
 		glGenVertexArrays(1, &vao);
@@ -73,7 +70,6 @@ int main() {
 
 			if (cursorMoved) {
 				glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &identified_rectangle);
-				std::cout << "Identified rectangle: " << identified_rectangle << '\n';
 				identified_rectangle = 0;
 				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &identified_rectangle);
 				cursorMoved = false;
