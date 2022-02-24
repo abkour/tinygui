@@ -92,5 +92,12 @@ void Window::resetCursorOffset() const {
 	uniqueCursor.yoff = 0.f;
 }
 
+float Window::getXpos() const {
+	return uniqueCursor.xpos;
+}
+
+float Window::getYpos() const {
+	return uniqueCursor.ypos;
+}
 
 }

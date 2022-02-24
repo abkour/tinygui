@@ -16,6 +16,9 @@ struct Window {
 
 	void resetCursorOffset() const;
 
+	float getXpos() const;
+	float getYpos() const;
+
 	GLFWwindow* window = nullptr;
 };
 
