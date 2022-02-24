@@ -3,7 +3,7 @@ layout(location = 0) out vec4 FragmentColor;
 
 flat in int rect_id;
 
-const vec3 colors[3] = vec3[3]
+const vec3 colors[4] = vec3[4]
 (
     vec3(1.f, 0.f, 0.f),
     vec3(0.f, 1.f, 0.f),
