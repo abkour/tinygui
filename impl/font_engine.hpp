@@ -3,10 +3,14 @@
 #include FT_FREETYPE_H
 #include <glad/glad.h>
 
+#include <glshader.hpp>
+
 #include <iostream>
 #include <map>
+#include <string>
 
 #include "point2.hpp"
+
 
 namespace tinygui {
 
@@ -28,10 +32,12 @@ struct FontEngine {
 
 	FontEngine(const char* pathToFont = "../rsc/consolas.fft");
 
+	void renderText(const std::string& text);
 
 private:
 
 	std::map<char, Character> characters;
+	GLuint quadvao, quadvbo;
 };
 
 }

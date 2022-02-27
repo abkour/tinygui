@@ -12,7 +12,7 @@ FontEngine::FontEngine(const char* pathToFont) {
 	FT_Face face;
 	if (FT_New_Face(ft, pathToFont, 0, &face)) {
 		throw std::runtime_error("Path doesn't specify valid font or internal error in FFT!");
-	}
+    }
 
 	FT_Set_Pixel_Sizes(face, 0, 48);
 
@@ -61,6 +61,29 @@ FontEngine::FontEngine(const char* pathToFont) {
     // OpenGL demands a 4byte alignment on texture elements. Our fonts have 1 byte alignment.
     // Therefore, we need to set the pixel alignment to 1byte.
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // To only render the parts of the quad that are occupied by character pixels,
+    // we enable alpha blending. See font_shader.glsl.fs/main for use case.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glGenVertexArrays(1, &quadvao);
+    glGenBuffers(1, &quadvbo);
+    glBindVertexArray(quadvao);
+    glBindBuffer(GL_ARRAY_BUFFER, quadvbo);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 4 * sizeof(float), NULL, GL_DYNAMIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
+
+    
 }
+
+void FontEngine::renderText(const std::string& text) {
+
+}
+
 
 }
