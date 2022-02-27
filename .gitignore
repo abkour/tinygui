@@ -40,3 +40,7 @@ tinygui.sln
 packages/
 tinygui/
 x64/
+/rsc/consolaz.ttf
+/rsc/consolai.ttf
+/rsc/consolab.ttf
+/rsc/consola.ttf
