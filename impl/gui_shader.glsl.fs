@@ -20,9 +20,20 @@ const vec3 colors[4] = vec3[4]
 uniform float cursorX;
 uniform float cursorY;
 
+//#include <C:\Users\flora\source\repos\tinygui\impl\extended.glsl.vs>
+
+bool compareCoordinates(vec2 cursor) {
+    return cursor + vec2(0.5) == gl_FragCoord.xy;
+}
+
 void main() {
+   
+    if(compareCoordinates(vec2(cursorX, cursorY))) {
+        idOfRectangle = rect_id;
+    }
+    /*
     if(vec2(cursorX, cursorY) + vec2(0.5) == gl_FragCoord.xy) {
          idOfRectangle = rect_id;
-    }
+    }*/
     FragmentColor = vec4(colors[rect_id], 1.f);
 }
