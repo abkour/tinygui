@@ -57,8 +57,12 @@ int main() {
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), &defaultRectId, GL_STATIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
-		Shader shaderProgram("C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.vs",
-			"C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.fs");
+
+		Shader shaderProgram({
+			{ GL_VERTEX_SHADER, "C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.vs" },
+			{ GL_FRAGMENT_SHADER, "C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.fs"}}, 
+			true
+		);
 		shaderProgram.bind();
 
 		// Upload initial cursor position
