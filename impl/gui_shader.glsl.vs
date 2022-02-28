@@ -3,6 +3,7 @@ layout(location = 0) in vec2 aPos;
 layout(location = 1) in int aId;
 
 //#include <mystatement.lib>
+//#include <1851875.lib>
 
 flat out int rect_id;
 
