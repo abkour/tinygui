@@ -102,7 +102,7 @@ FontEngine::~FontEngine() {
     }
 }
 
-void FontEngine::renderText(const std::string& text) {
+void FontEngine::renderText(const std::string& text, const unsigned xOff, const unsigned yOff) {
     font_shader.bind();
     float color[3] = { 1.f, 1.f, 1.f };
     glUniform3fv(glGetUniformLocation(font_shader.id(), "color"), 1, color);
@@ -115,8 +115,8 @@ void FontEngine::renderText(const std::string& text) {
     Point2 vertices[6];
     for (int i = 0; i < text.size(); ++i) {
         auto ch = characters.find(text[i]);
-        Point2 bl(advance + ch->second.bearing.x, 200 - (ch->second.size.y - ch->second.bearing.y));
-        Point2 tr(advance + ch->second.bearing.x + ch->second.size.x, 200 + ch->second.bearing.y);
+        Point2 bl(xOff + advance + ch->second.bearing.x, yOff - (ch->second.size.y - ch->second.bearing.y));
+        Point2 tr(xOff + advance + ch->second.bearing.x + ch->second.size.x, yOff + ch->second.bearing.y);
         advance += ch->second.advance;
         
         // We have to flip the UV coordinates. That's why this looks kinda weird on first glance.
