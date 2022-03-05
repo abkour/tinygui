@@ -117,10 +117,9 @@ int main() {
 				}
 			}
 
-			//myfontengine.renderLine("WorldWideWeb", 200, 600);
-			//myfontengine.renderMultiLineInBox(text, 100, 600, 1820, 1080);
-			myfontengine.setScale(0.5f);
-			myfontengine.renderLine("WorldWideWeb", 600, 600);
+			myfontengine.setScale(.5f);
+			myfontengine.renderMultiLineInBox(text, 100, 600, 1820, 1080);
+			//myfontengine.renderLine("WorldWideWeb", 600, 600);
 			shaderProgram.bind();
 
 			glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
