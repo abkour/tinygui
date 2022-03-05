@@ -1,6 +1,7 @@
 #include "include/tinygui.hpp"
 #include "test/window.hpp"
-#include <glshader.hpp>
+#include "impl/font_engine.hpp"
+#include <shaderdirect.hpp>
 
 #include <iostream>
 
@@ -17,9 +18,6 @@ int main() {
 
 		Window window(screen_resolution.x, screen_resolution.y, "tinygui");
 
-		if (glfwRawMouseMotionSupported()) {
-			//glfwSetInputMode(window.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-		}
 		glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		window.enableCursorCallback();
 
@@ -57,14 +55,15 @@ int main() {
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), &defaultRectId, GL_STATIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
+		FontEngine myfontengine;
 
-		Shader shaderProgram({
-			{ GL_VERTEX_SHADER, "C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.vs" },
-			{ GL_FRAGMENT_SHADER, "C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.fs"}}, 
-			true
+		ShaderWrapper shaderProgram(
+			true, 
+			shader_p(GL_VERTEX_SHADER, "C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.vs"),
+			shader_p(GL_FRAGMENT_SHADER, "C://Users//flora//source//repos//tinygui//impl//gui_shader.glsl.fs")
 		);
 		shaderProgram.bind();
-
+	
 		// Upload initial cursor position
 		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorX"), window.getXpos());
 		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorY"), window.getYpos());
@@ -89,18 +88,19 @@ int main() {
 				cursorMoved = true;
 			}
 
+			glBindVertexArray(vao);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !mouseState.mouseClicked) {
 				mouseState.mouseClicked = true;
 				glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &mouseState.rect_id);
+				std::cout << "mousestate: " << mouseState.rect_id << '\n';
 			}
 			if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE) {
 				mouseState.mouseClicked = false;
 			}
 
 			if (cursorMoved && mouseState.mouseClicked) {
-
 				if (mouseState.rect_id != 0) {
 					auto spXoff = xoff * 2 / screen_resolution.x;
 					auto spYoff = yoff * 2 / screen_resolution.y;
@@ -109,10 +109,17 @@ int main() {
 						quad[i * 2 + 1] += spYoff;
 					}
 					// Update buffer contents
+					glBindBuffer(GL_ARRAY_BUFFER, vbo);
 					glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(quad), quad);
 				}
 			}
 
+			myfontengine.renderText("WorldWideWeb");
+			shaderProgram.bind();
+
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+			glBindVertexArray(vao);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &defaultRectId);
 
 			glfwSwapBuffers(window.window);
