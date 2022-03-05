@@ -69,8 +69,7 @@ int main() {
 		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorY"), window.getYpos());
 
 		std::vector<std::string> text;
-		text.push_back("WorldWideWeb");
-		text.push_back("IsBig");
+		text.push_back("Hello my name is so and so and I have been working at this company for over 3000 years. At this point in my career I'm looking to advance into research. It has always been a dream of mine and I'm looking forward to work with the great scientiests of this generation. I really can't wait anymore. IT is so exciting, can't contain it. Anyway, how are you doing? Haven't heard from you in a while. Hope everything is already with kim.");
 
 		bool cursorMoved = false;
 		while (!glfwWindowShouldClose(window.window)) {
@@ -93,7 +92,7 @@ int main() {
 			}
 
 			glBindVertexArray(vao);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
+			//glDrawArrays(GL_TRIANGLES, 0, 6);
 
 			if (glfwGetMouseButton(window.window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && !mouseState.mouseClicked) {
 				mouseState.mouseClicked = true;
@@ -119,7 +118,8 @@ int main() {
 			}
 
 			//myfontengine.renderLine("WorldWideWeb", 200, 600);
-			myfontengine.renderMultiLine(text, 200, 600);
+			//myfontengine.renderMultiLineInBox(text, 100, 600, 1820, 1080);
+			myfontengine.renderLine("WorldWideWeb", 600, 600);
 			shaderProgram.bind();
 
 			glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
