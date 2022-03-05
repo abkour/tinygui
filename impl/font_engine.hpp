@@ -35,7 +35,7 @@ struct FontEngine {
 
 	~FontEngine();
 
-	void renderText(const std::string& text);
+	void renderText(const std::string& text, const unsigned xOff, const unsigned yOff);
 
 private:
 
