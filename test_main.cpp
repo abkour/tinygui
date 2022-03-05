@@ -68,6 +68,10 @@ int main() {
 		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorX"), window.getXpos());
 		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorY"), window.getYpos());
 
+		std::vector<std::string> text;
+		text.push_back("WorldWideWeb");
+		text.push_back("IsBig");
+
 		bool cursorMoved = false;
 		while (!glfwWindowShouldClose(window.window)) {
 			glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -114,7 +118,8 @@ int main() {
 				}
 			}
 
-			myfontengine.renderText("WorldWideWeb");
+			//myfontengine.renderLine("WorldWideWeb", 200, 600);
+			myfontengine.renderMultiLine(text, 200, 600);
 			shaderProgram.bind();
 
 			glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
