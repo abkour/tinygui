@@ -39,6 +39,10 @@ struct FontEngine {
 	void renderLine(const std::string& text, const unsigned xOff, const unsigned yOff);
 
 	void renderMultiLine(const std::vector<std::string>& text, const unsigned xOff, const unsigned yOff);
+	
+	void renderMultiLineInBox(const std::vector<std::string>& text, const unsigned xOff, const unsigned yOff, const unsigned maxWidth, const unsigned maxHeight);
+
+
 
 private:
 
