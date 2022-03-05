@@ -102,7 +102,7 @@ FontEngine::~FontEngine() {
     }
 }
 
-void FontEngine::renderText(const std::string& text, const unsigned xOff, const unsigned yOff) {
+void FontEngine::renderLine(const std::string& text, const unsigned xOff, const unsigned yOff) {
     font_shader.bind();
     float color[3] = { 1.f, 1.f, 1.f };
     glUniform3fv(glGetUniformLocation(font_shader.id(), "color"), 1, color);
