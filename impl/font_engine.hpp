@@ -8,6 +8,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 
 #include "point2.hpp"
 #include <mat4.hpp>
@@ -37,7 +38,11 @@ struct FontEngine {
 
 	void renderLine(const std::string& text, const unsigned xOff, const unsigned yOff);
 
+	void renderMultiLine(const std::vector<std::string>& text, const unsigned xOff, const unsigned yOff);
+
 private:
+
+	unsigned maxAdvanceHeight;
 
 	ShaderWrapper font_shader;
 

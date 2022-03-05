@@ -63,6 +63,8 @@ FontEngine::FontEngine(const char* pathToFont) {
      
         characters.insert(std::pair<char, Character>(c, character));
     }
+    
+    maxAdvanceHeight = face->max_advance_height >> 6;
 
     // We no longer need to interface with the FT library.
     FT_Done_Face(face);
@@ -138,6 +140,49 @@ void FontEngine::renderLine(const std::string& text, const unsigned xOff, const 
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 }
+
+void FontEngine::renderMultiLine(const std::vector<std::string>& text, const unsigned xOff, const unsigned yOff) {
+    font_shader.bind();
+    float color[3] = { 1.f, 1.f, 1.f };
+    glUniform3fv(glGetUniformLocation(font_shader.id(), "color"), 1, color);
+
+    std::cout.sync_with_stdio(false);
+
+    glBindVertexArray(quadvao);
+    glBindBuffer(GL_ARRAY_BUFFER, quadvbo);
+    unsigned advance = 0;
+    unsigned vAdvance = 0;
+    Point2 vertices[6];
+    for (int i = 0; i < text.size(); ++i) {
+        for (int j = 0; j < text[i].size(); ++j) {
+            auto ch = characters.find(text[i][j]);
+            Point2 bl(xOff + advance + ch->second.bearing.x, yOff - (ch->second.size.y - ch->second.bearing.y) - vAdvance);
+            Point2 tr(xOff + advance + ch->second.bearing.x + ch->second.size.x, yOff + ch->second.bearing.y - vAdvance);
+            advance += ch->second.advance;
+
+            // We have to flip the UV coordinates. That's why this looks kinda weird on first glance.
+            Point2 vertices[12] = {
+                { bl.x, tr.y },     Point2(0.f, 0.f),
+                tr,                 Point2(1.f, 0.f),
+                { tr.x, bl.y },     Point2(1.f, 1.f),
+
+                { bl.x, tr.y },     Point2(0.f, 0.f),
+                bl,                 Point2(0.f, 1.f),
+                { tr.x, bl.y },     Point2(1.f, 1.f)
+            };
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+            glBindTexture(GL_TEXTURE_2D, ch->second.textureID);
+            glActiveTexture(GL_TEXTURE0);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+        advance = 0;
+        vAdvance += maxAdvanceHeight * 1.5;
+    }
+}
+
 
 
 }
