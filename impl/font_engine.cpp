@@ -82,6 +82,8 @@ FontEngine::FontEngine(const char* pathToFont) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
 
     glm::mat4 projection = glm::ortho(0.f, 1920.f, 0.f, 1080.f);
+    glm::mat4 transformFont(3.f);
+    transformFont[3][3] = 1.f;
 
     ShaderWrapper tmp_font_shader(
         false,
@@ -91,6 +93,7 @@ FontEngine::FontEngine(const char* pathToFont) {
     font_shader = std::move(tmp_font_shader);
     font_shader.bind();
     glUniformMatrix4fv(glGetUniformLocation(font_shader.id(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(font_shader.id(), "transformMatrix"), 1, GL_FALSE, glm::value_ptr(transformFont));
 
     // To only render the parts of the quad that are occupied by character pixels,
     // we enable alpha blending. See font_shader.glsl.fs/main for use case.
@@ -106,8 +109,8 @@ FontEngine::~FontEngine() {
 
 void FontEngine::renderLine(const std::string& text, const unsigned xOff, const unsigned yOff) {
     font_shader.bind();
-    float color[3] = { 1.f, 1.f, 1.f };
-    glUniform3fv(glGetUniformLocation(font_shader.id(), "color"), 1, color);
+    float color[3] = { 1.f, 0.f, 1.f };
+    glUniform3fv(glGetUniformLocation(font_shader.id(), "fontColor"), 1, color);
 
     std::cout.sync_with_stdio(false);
 

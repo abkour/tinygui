@@ -43,7 +43,6 @@ struct FontEngine {
 	void renderMultiLineInBox(const std::vector<std::string>& text, const unsigned xOff, const unsigned yOff, const unsigned maxWidth, const unsigned maxHeight);
 
 
-
 private:
 
 	unsigned maxAdvanceHeight;
