@@ -82,8 +82,7 @@ FontEngine::FontEngine(const char* pathToFont) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
 
     glm::mat4 projection = glm::ortho(0.f, 1920.f, 0.f, 1080.f);
-    glm::mat4 transformFont(3.f);
-    transformFont[3][3] = 1.f;
+    glm::mat4 transformFont(1.f);
 
     ShaderWrapper tmp_font_shader(
         false,
@@ -106,6 +105,14 @@ FontEngine::~FontEngine() {
         glDeleteTextures(1, &ch.second.textureID);
     }
 }
+
+void FontEngine::setScale(const float scaleFactor) {
+    glm::mat4 transformFont(scaleFactor);
+    transformFont[3][3] = 1.f;
+    font_shader.bind();
+    glUniformMatrix4fv(glGetUniformLocation(font_shader.id(), "transformMatrix"), 1, GL_FALSE, glm::value_ptr(transformFont));
+}
+
 
 void FontEngine::renderLine(const std::string& text, const unsigned xOff, const unsigned yOff) {
     font_shader.bind();
