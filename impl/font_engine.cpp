@@ -201,7 +201,7 @@ void FontEngine::renderMultiLineInBox(  const std::vector<std::string>& text,
 {
     font_shader.bind();
     float color[3] = { 1.f, 1.f, 1.f };
-    glUniform3fv(glGetUniformLocation(font_shader.id(), "color"), 1, color);
+    glUniform3fv(glGetUniformLocation(font_shader.id(), "fontColor"), 1, color);
 
     std::cout.sync_with_stdio(false);
 
