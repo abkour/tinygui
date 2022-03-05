@@ -205,7 +205,7 @@ void FontEngine::renderMultiLineInBox(  const std::vector<std::string>& text,
             auto ch = characters.find(text[i][j]);
 
             const auto lx = xOff + advance + ch->second.bearing.x;
-            const auto rx = xOff + advance + ch->second.bearing.x;
+            const auto rx = xOff + advance + ch->second.bearing.x + ch->second.size.x;
             if (lx > maxWidth || rx > maxWidth) {
                 advance = 0;
                 vAdvance += maxAdvanceHeight * 1.5;
