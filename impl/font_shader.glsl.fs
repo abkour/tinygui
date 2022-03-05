@@ -7,6 +7,6 @@ uniform sampler2D inputText;
 uniform vec3 FontColor;
 
 void main() {
-    vec4 alpha = vec4(1.f, 1.f, 1.f, texture(inputText, texCoord));
-    FragmentColor = vec4(FontColor, 1.f) * alpha;
+    vec4 alpha = vec4(1.f, 1.f, 1.f, texture(inputText, texCoord).r);
+    FragmentColor = vec4(1.f) * alpha;
 }
