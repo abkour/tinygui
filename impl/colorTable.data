@@ -1,0 +1,7 @@
+const vec3 colors[4] = vec3[4]
+(
+    vec3(1.f, 0.f, 0.f),
+    vec3(0.f, 1.f, 1.f),
+    vec3(0.f, 0.f, 1.f),
+    vec3(1.f, 1.f, 0.f) // If cursor hovers over rectangle we change color to yellow
+);

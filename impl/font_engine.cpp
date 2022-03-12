@@ -6,7 +6,7 @@
 
 namespace tinygui {
 
-FontEngine::FontEngine(const char* pathToFont) {
+TGUIFontEngine::TGUIFontEngine(const unsigned pixelsize, const char* pathToFont) {
 
     // OpenGL demands a 4byte alignment on texture elements. Our fonts have 1 byte alignment.
     // Therefore, we need to set the pixel alignment to 1byte.
@@ -22,7 +22,7 @@ FontEngine::FontEngine(const char* pathToFont) {
 		throw std::runtime_error("Path doesn't specify valid font or internal error in FFT!");
     }
 
-	FT_Set_Pixel_Sizes(face, 0, 48);
+	FT_Set_Pixel_Sizes(face, 0, pixelsize);
 
     for (unsigned char c = 0; c < 128; c++)
     {
@@ -94,19 +94,27 @@ FontEngine::FontEngine(const char* pathToFont) {
     glUniformMatrix4fv(glGetUniformLocation(font_shader.id(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(glGetUniformLocation(font_shader.id(), "transformMatrix"), 1, GL_FALSE, glm::value_ptr(transformFont));
 
+    float color[3] = { 1.f, 0.f, 0.f };
+    glUniform3fv(glGetUniformLocation(font_shader.id(), "fontColor"), 1, color);
+
     // To only render the parts of the quad that are occupied by character pixels,
     // we enable alpha blending. See font_shader.glsl.fs/main for use case.
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-FontEngine::~FontEngine() {
+TGUIFontEngine::~TGUIFontEngine() {
     for (auto& ch : characters) {
         glDeleteTextures(1, &ch.second.textureID);
     }
 }
 
-void FontEngine::setScale(const float scaleFactor) {
+void TGUIFontEngine::setColor(const float* color) {
+    font_shader.bind();
+    glUniform3fv(glGetUniformLocation(font_shader.id(), "fontColor"), 1, color);
+}
+
+void TGUIFontEngine::setScale(const float scaleFactor) {
     glm::mat4 transformFont(scaleFactor);
     transformFont[3][3] = 1.f;
     font_shader.bind();
@@ -114,13 +122,8 @@ void FontEngine::setScale(const float scaleFactor) {
 }
 
 
-void FontEngine::renderLine(const std::string& text, const unsigned xOff, const unsigned yOff) {
+void TGUIFontEngine::renderLine(const std::string& text, const unsigned xOff, const unsigned yOff) {
     font_shader.bind();
-    float color[3] = { 1.f, 0.f, 1.f };
-    glUniform3fv(glGetUniformLocation(font_shader.id(), "fontColor"), 1, color);
-
-    std::cout.sync_with_stdio(false);
-
     glBindVertexArray(quadvao);
     glBindBuffer(GL_ARRAY_BUFFER, quadvbo);
     unsigned advance = 0;
@@ -151,13 +154,8 @@ void FontEngine::renderLine(const std::string& text, const unsigned xOff, const 
     }
 }
 
-void FontEngine::renderMultiLine(const std::vector<std::string>& text, const unsigned xOff, const unsigned yOff) {
+void TGUIFontEngine::renderMultiLine(const std::vector<std::string>& text, const unsigned xOff, const unsigned yOff) {
     font_shader.bind();
-    float color[3] = { 1.f, 1.f, 1.f };
-    glUniform3fv(glGetUniformLocation(font_shader.id(), "color"), 1, color);
-
-    std::cout.sync_with_stdio(false);
-
     glBindVertexArray(quadvao);
     glBindBuffer(GL_ARRAY_BUFFER, quadvbo);
     unsigned advance = 0;
@@ -194,17 +192,12 @@ void FontEngine::renderMultiLine(const std::vector<std::string>& text, const uns
 }
 
 
-void FontEngine::renderMultiLineInBox(  const std::vector<std::string>& text,
+void TGUIFontEngine::renderMultiLineInBox(  const std::vector<std::string>& text,
                                         const unsigned xOff, const unsigned yOff,
                                         const unsigned maxWidth,
                                         const unsigned maxHeight) 
 {
     font_shader.bind();
-    float color[3] = { 0.f, 1.f, 1.f };
-    glUniform3fv(glGetUniformLocation(font_shader.id(), "fontColor"), 1, color);
-
-    std::cout.sync_with_stdio(false);
-
     glBindVertexArray(quadvao);
     glBindBuffer(GL_ARRAY_BUFFER, quadvbo);
     unsigned advance = 0;
@@ -218,7 +211,7 @@ void FontEngine::renderMultiLineInBox(  const std::vector<std::string>& text,
             const auto rx = xOff + advance + ch->second.bearing.x + ch->second.size.x;
             if (lx > maxWidth || rx > maxWidth) {
                 advance = 0;
-                vAdvance += maxAdvanceHeight * 1.5;
+                vAdvance += maxAdvanceHeight * 0.4;
             }
  
             Point2 bl(xOff + advance + ch->second.bearing.x, yOff - (ch->second.size.y - ch->second.bearing.y) - vAdvance);
@@ -246,6 +239,58 @@ void FontEngine::renderMultiLineInBox(  const std::vector<std::string>& text,
     }
 }
 
+
+void TGUIFontEngine::renderMultiLineInBox2( const std::vector<std::string>& text,
+                                        const unsigned xOff, const unsigned yOff,
+                                        const unsigned maxWidth,
+                                        const unsigned maxHeight)
+{
+    font_shader.bind();
+    float color[3] = { 0.f, 1.f, 1.f };
+    glUniform3fv(glGetUniformLocation(font_shader.id(), "fontColor"), 1, color);
+
+    std::cout.sync_with_stdio(false);
+
+    glBindVertexArray(quadvao);
+    glBindBuffer(GL_ARRAY_BUFFER, quadvbo);
+    unsigned advance = 0;
+    unsigned vAdvance = 0;
+    Point2 vertices[6];
+    for (int i = 0; i < text.size(); ++i) {
+        for (int j = 0; j < text[i].size(); ++j) {
+            auto ch = characters.find(text[i][j]);
+
+            const auto lx = xOff + advance + ch->second.bearing.x;
+            const auto rx = xOff + advance + ch->second.bearing.x + ch->second.size.x;
+            if (lx > maxWidth || rx > maxWidth) {
+                advance = 0;
+                vAdvance += maxAdvanceHeight * 0.4;
+            }
+
+            Point2 bl(xOff + advance + ch->second.bearing.x, yOff - (ch->second.size.y - ch->second.bearing.y) - vAdvance);
+            Point2 tr(xOff + advance + ch->second.bearing.x + ch->second.size.x, yOff + ch->second.bearing.y - vAdvance);
+            advance += ch->second.advance;
+
+            // We have to flip the UV coordinates. That's why this looks kinda weird on first glance.
+            Point2 vertices[12] = {
+                { bl.x, tr.y },     Point2(0.f, 0.f),
+                tr,                 Point2(1.f, 0.f),
+                { tr.x, bl.y },     Point2(1.f, 1.f),
+
+                { bl.x, tr.y },     Point2(0.f, 0.f),
+                bl,                 Point2(0.f, 1.f),
+                { tr.x, bl.y },     Point2(1.f, 1.f)
+            };
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+            glBindTexture(GL_TEXTURE_2D, ch->second.textureID);
+            glActiveTexture(GL_TEXTURE0);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+    }
+}
 
 
 }

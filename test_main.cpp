@@ -3,7 +3,11 @@
 #include "impl/font_engine.hpp"
 #include <shaderdirect.hpp>
 
+#include <chrono>
 #include <iostream>
+#include <thread>
+
+#include "applications/frame_time_ui.hpp"
 
 struct StateOfMouseAtClick {
 	bool mouseClicked;
@@ -12,6 +16,8 @@ struct StateOfMouseAtClick {
 
 int main() {
 	try {
+		std::srand(std::time(nullptr));
+
 		using namespace tinygui;
 
 		Point2 screen_resolution(1920, 1080);
@@ -55,7 +61,13 @@ int main() {
 		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(int), &defaultRectId, GL_STATIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo);
 
-		FontEngine myfontengine;
+		const unsigned fontsize = 192;
+		const float fontcolor[] = { 1.f, 1.f, 0.f };
+		std::shared_ptr<TGUIFontEngine> fontengine = std::make_shared<TGUIFontEngine>(fontsize);
+		fontengine->setColor(fontcolor);
+
+		TGUIFrameDisplay ftd(fontengine);
+		ftd.setScreenPosition(100, 500);
 
 		ShaderWrapper shaderProgram(
 			true, 
@@ -69,14 +81,27 @@ int main() {
 		glUniform1f(glGetUniformLocation(shaderProgram.id(), "cursorY"), window.getYpos());
 
 		std::vector<std::string> text;
-		text.push_back("Hello my name is so and so and I have been working at this company for over 3000 years. At this point in my career I'm looking to advance into research. It has always been a dream of mine and I'm looking forward to work with the great scientiests of this generation. I really can't wait anymore. IT is so exciting, can't contain it. Anyway, how are you doing? Haven't heard from you in a while. Hope everything is already with kim.");
+		std::string longString;
+		for (int i = 0; i < 30'000; ++i) {
+			longString.push_back('a' + (std::rand() % 25));
+		}
+		text.push_back(longString);
+
+		double totalFrameTime = 0.f;
+		double minFrameTime = 10000000.f;
+		double maxFrameTime = 0.f;
+		int nFramesRendered = 0;
 
 		bool cursorMoved = false;
+
+		std::string helloworld = "hello world";
+
+		std::cout.sync_with_stdio(false);
 		while (!glfwWindowShouldClose(window.window)) {
+			ftd.timeStart();
 			glClearColor(0.f, 0.f, 0.f, 0.f);
 			glClear(GL_COLOR_BUFFER_BIT);
-
-			bool cursorMoved = false;
+			/*bool cursorMoved = false;
 
 			auto xoff = window.getXoffset();
 			auto yoff = window.getYoffset();
@@ -115,25 +140,28 @@ int main() {
 					glBindBuffer(GL_ARRAY_BUFFER, vbo);
 					glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(quad), quad);
 				}
-			}
-
-			myfontengine.setScale(.5f);
-			myfontengine.renderMultiLineInBox(text, 100, 600, 1820, 1080);
-			//myfontengine.renderLine("WorldWideWeb", 600, 600);
+			}*/
 			shaderProgram.bind();
-
 			glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
 			glBindVertexArray(vao);
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &defaultRectId);
+			if (nFramesRendered % 1000 == 0) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(16));
+				ftd.timeEnd();
+			}
+			ftd.drawFPS();
 
 			glfwSwapBuffers(window.window);
 			glfwPollEvents();
-
 			if (glfwGetKey(window.window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 				glfwSetWindowShouldClose(window.window, GLFW_TRUE);
 			}
+			nFramesRendered++;
 		}
+		std::cout << "Number of frames rendered: " << nFramesRendered << '\n';
+		std::cout << "Average frame time: " << totalFrameTime / nFramesRendered << '\n';
+
 		glDeleteVertexArrays(1, &vao);
 		glDeleteBuffers(1, &vbo);
 	}
