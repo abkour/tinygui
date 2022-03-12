@@ -7,7 +7,7 @@ namespace tinygui {
 
 struct TGUIFrameDisplay {
 
-	TGUIFrameDisplay(std::shared_ptr<FontEngine> pFontEngine);
+	TGUIFrameDisplay(std::shared_ptr<TGUIFontEngine> pFontEngine);
 
 	void setScreenPosition(unsigned xpos, unsigned ypos);
 
@@ -23,7 +23,7 @@ struct TGUIFrameDisplay {
 private:
 
 	unsigned displayPosX, displayPosY;
-	std::shared_ptr<FontEngine> fontEngine;
+	std::shared_ptr<TGUIFontEngine> fontEngine;
 
 	std::chrono::high_resolution_clock::time_point start, end;
 	double elapsed_time;

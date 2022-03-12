@@ -2,7 +2,7 @@
 
 namespace tinygui {
 
-TGUIFrameDisplay::TGUIFrameDisplay(std::shared_ptr<FontEngine> pFontEngine) {
+TGUIFrameDisplay::TGUIFrameDisplay(std::shared_ptr<TGUIFontEngine> pFontEngine) {
 	displayPosX = 0;
 	displayPosY = 0;
 	fontEngine = pFontEngine;
