@@ -21,8 +21,6 @@ static void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
     interfaceController->clientState.MouseDelta.y = interfaceController->clientState.MousePosition.y - ypos;
     interfaceController->clientState.MousePosition.x = xpos;
     interfaceController->clientState.MousePosition.y = ypos;
-
-    std::cout << "Mouse delta: " << interfaceController->clientState.MouseDelta << '\n';
 }
 
 static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
@@ -72,7 +70,7 @@ Window::Window(const Vec2 windowDimensions)
     // Enable keyboard callback
 
     // Enable mouse callback
-    glfwSetCursorPosCallback(window, CursorPositionCallback);
+    //glfwSetCursorPosCallback(window, CursorPositionCallback);
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
 }
 
@@ -80,9 +78,23 @@ Window::~Window() {
     glfwTerminate();
 }
 
-void Window::resize(const Vec2 newWindowDimensions) {
+void Window::Update() {
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
 
+    if (interfaceController->initialEntry) {
+        interfaceController->clientState.MouseDelta.x = xpos;
+        interfaceController->clientState.MouseDelta.y = ypos;
+        interfaceController->initialEntry = false;
+    }
+
+    interfaceController->clientState.MouseDelta.x = xpos - interfaceController->clientState.MousePosition.x;
+    interfaceController->clientState.MouseDelta.y = interfaceController->clientState.MousePosition.y - ypos;
+    interfaceController->clientState.MousePosition.x = xpos;
+    interfaceController->clientState.MousePosition.y = ypos;
 }
+
+void Window::resize(const Vec2 newWindowDimensions) {}
 
 ClientState Window::GetPeripheralState() const {
     return interfaceController->clientState;

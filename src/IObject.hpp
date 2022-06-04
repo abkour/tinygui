@@ -20,6 +20,7 @@ public:
 	virtual std::size_t GetVertexCount() const = 0 {}
 	virtual float* GetVertices() const = 0 {}
 	Vec2 GetTranslationVector() const { return TranslationVector; }
+	virtual void Translate(const Vec2 TranslationDelta) = 0 {}
 
 	virtual bool Update(const Vec2 CursorPosition, const ClientState pClientState) = 0 {}
 	virtual void Render(unsigned int shaderID) = 0 {}

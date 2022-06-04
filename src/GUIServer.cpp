@@ -54,10 +54,12 @@ IObject* GUIServer::ServerImpl::FindObjectById(const unsigned int id, IObject* n
 	for (auto&& attachedObject : node->attachedObjects) {
 		if (attachedObject->id == id) {
 			return attachedObject;
+		} else {
+			auto RecAttachedObject = FindObjectById(id, attachedObject);
+			if (RecAttachedObject != nullptr) {
+				return RecAttachedObject;
+			}
 		}
-	}
-	for (auto&& attachedObject : node->attachedObjects) {
-		FindObjectById(id, attachedObject);
 	}
 	return nullptr;
 }
@@ -74,10 +76,10 @@ void GUIServer::ServerImpl::UpdateState(IObject* node, const Vec2 CursorPosition
 			if ((*it)->GetTerminateStatus()) {
 				it = node->attachedObjects.erase(it);
 			} else {
-				UpdateState(*it, CursorPosition, pClientState);
 				++it;
 			}
 		} else {
+			UpdateState(*it, CursorPosition, pClientState);
 			++it;
 		}
 	}
@@ -87,6 +89,7 @@ void GUIServer::ServerImpl::Render(IObject* root) {
 	uberShader.bind();
 	for (auto&& childObject : root->attachedObjects) {
 		childObject->Render(uberShader.id());
+		Render(childObject);
 	}
 }
 

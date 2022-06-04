@@ -20,6 +20,7 @@ public:
 
 	virtual bool Update(const Vec2 CursorPosition, const ClientState pClientState) override;
 	virtual void Render(unsigned int shaderID) override;
+	virtual void Translate(const Vec2 TranslationDelta) override;
 
 protected:
 

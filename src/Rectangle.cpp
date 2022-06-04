@@ -24,11 +24,24 @@ Rectangle::Rectangle(std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc, std::
 }
 
 bool Rectangle::Update(const Vec2 CursorPosition, const ClientState pClientState) {
-	if (CursorPosition.x - origin.x < dimension.x && CursorPosition.y - origin.y < dimension.y) {
+	Vec2 OffsetOrigin = origin + TranslationVector;
+	/*if (std::abs(CursorPosition.x - OffsetOrigin.x) < dimension.x && std::abs(CursorPosition.y - OffsetOrigin.y) < dimension.y) {
+		TerminateStatus = true;
+		return true;
+	}*/
+	if (CursorPosition.x > OffsetOrigin.x && CursorPosition.x < OffsetOrigin.x + dimension.x 
+		&& CursorPosition.y > OffsetOrigin.y && CursorPosition.y < OffsetOrigin.y + dimension.y) {
 		TerminateStatus = true;
 		return true;
 	}
 	return false;
+}
+
+void Rectangle::Translate(const Vec2 TranslationDelta) {
+	TranslationVector = TranslationVector + TranslationDelta;
+	for (auto&& attachedObject : attachedObjects) {
+		attachedObject->Translate(TranslationDelta);
+	}
 }
 
 void Rectangle::Render(unsigned int shaderID) {
@@ -38,3 +51,4 @@ void Rectangle::Render(unsigned int shaderID) {
 	glUniform2fv(glGetUniformLocation(shaderID, "translation"), 1, &TranslationVector.x);
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 }
+

@@ -20,8 +20,8 @@ public:
 	float* GetVertices() const override { return vertices.get(); }
 
 	virtual bool Update(const Vec2 CursorPosition, const ClientState pClientState) override;
-	
 	virtual void Render(GLuint shaderID) override;
+	virtual void Translate(const Vec2 TranslationDelta) override;
 
 protected:
 

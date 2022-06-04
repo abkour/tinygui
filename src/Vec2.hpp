@@ -27,5 +27,12 @@ public:
 		return res;
 	}
 
+	Vec2& operator+(const Vec2& other) {
+		Vec2 res;
+		res.x = x + other.x;
+		res.y = y + other.y;
+		return res;
+	}
+
 	float x, y;
 };

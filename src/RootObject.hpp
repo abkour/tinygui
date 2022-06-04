@@ -10,6 +10,7 @@ public:
 	// This sits on top of all other objects
 	virtual bool Update(const Vec2 CursorPosition, const ClientState pClientState) override { return true; }
 	virtual void Render(unsigned int shaderID) {}
+	virtual void Translate(const Vec2 TranslationDelta) {}
 
 	virtual std::size_t GetVertexCount() const override { return 0; }
 	virtual float* GetVertices() const override { return nullptr; }

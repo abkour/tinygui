@@ -18,10 +18,11 @@ public:
 	Window(const Vec2 windowDimensions);
 	~Window();
 
+	void Update();
+
 	void resize(const Vec2 newWindowDimensions);
 
 	ClientState GetPeripheralState() const;
-
 	GLFWwindow* GetWindow() { return window; }
 
 protected:

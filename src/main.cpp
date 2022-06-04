@@ -17,10 +17,14 @@ int main() {
     auto rect1 = guiServer.CreateRectangle(Vec2(-0.9f, -0.9f), Vec2(0.1f, 0.1f), 0);
     auto rect2 = guiServer.CreateRectangle(Vec2(-0.7f, -0.7f), Vec2(0.1f, 0.1f), 0);
     auto windowRect1 = guiServer.CreateWindowedRectangle(Vec2(-0.25f, -0.25f), Vec2(0.5, 0.5), Vec2(0.1, 0.1), 0);
+    auto windowRect2 = guiServer.CreateWindowedRectangle(Vec2(0.7f, 0.7f), Vec2(0.1f, 0.1f), Vec2(0.f, 0.1), windowRect1);
+    auto rect4 = guiServer.CreateRectangle(Vec2(0.7f, -0.7f), Vec2(0.1f, 0.1f), windowRect2);
 
     while (!glfwWindowShouldClose(windowHandle.GetWindow())) {
         glClearColor(0.f, 0.f, 1.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        windowHandle.Update();
 
         ClientState clientState = windowHandle.GetPeripheralState();
 

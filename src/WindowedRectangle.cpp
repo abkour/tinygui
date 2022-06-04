@@ -35,15 +35,13 @@ WindowedRectangle::WindowedRectangle(std::shared_ptr<IVertexBufferDesc> pVertexB
 }
 
 bool WindowedRectangle::Update(const Vec2 CursorPosition, const ClientState pClientState) {
-	if (CursorPosition.x - origin.x < dimensionBody.x 
-		&& CursorPosition.y > origin.y + dimensionBody.y 
-		&& CursorPosition.y < origin.y + dimensionBody.y + dimensionHead.y) 
+	Vec2 OffsetOrigin = origin + TranslationVector;
+	if (CursorPosition.x - OffsetOrigin.x < dimensionBody.x
+		&& CursorPosition.y > OffsetOrigin.y + dimensionBody.y
+		&& CursorPosition.y < OffsetOrigin.y + dimensionBody.y + dimensionHead.y)
 	{
 		if (pClientState.LMB_Down) {
-			TranslationVector.x += pClientState.MouseDelta.x;
-			TranslationVector.y += pClientState.MouseDelta.y;
-			std::cout << "Mouse delta: " << pClientState.MouseDelta << '\n';
-			std::cout << "Translation Vector: " << TranslationVector << '\n';
+			Translate(pClientState.MouseDelta);
 		}
 		if (pClientState.RMB_Down) {
 			TerminateStatus = true;
@@ -51,6 +49,13 @@ bool WindowedRectangle::Update(const Vec2 CursorPosition, const ClientState pCli
 		return true;
 	}
 	return false;
+}
+
+void WindowedRectangle::Translate(const Vec2 TranslationDelta) {
+	TranslationVector = TranslationVector + TranslationDelta;
+	for (auto&& attachedObject : attachedObjects) {
+		attachedObject->Translate(TranslationDelta);
+	}
 }
 
 void WindowedRectangle::Render(unsigned int shaderID) {
