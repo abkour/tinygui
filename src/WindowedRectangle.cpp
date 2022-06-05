@@ -34,7 +34,7 @@ WindowedRectangle::WindowedRectangle(std::shared_ptr<IVertexBufferDesc> pVertexB
 	VertexBuffer = pVertexBuffer;
 }
 
-bool WindowedRectangle::Update(const Vec2 CursorPosition, const ClientState pClientState) {
+ObjectStatus WindowedRectangle::Update(const Vec2 CursorPosition, const ClientState pClientState) {
 	Vec2 OffsetOrigin = origin + TranslationVector;
 	if (CursorPosition.x - OffsetOrigin.x < dimensionBody.x
 		&& CursorPosition.y > OffsetOrigin.y + dimensionBody.y
@@ -44,11 +44,11 @@ bool WindowedRectangle::Update(const Vec2 CursorPosition, const ClientState pCli
 			Translate(pClientState.MouseDelta);
 		}
 		if (pClientState.RMB_Down) {
-			TerminateStatus = true;
+			return ObjectStatus::TERMINATED;
 		}
-		return true;
+		return ObjectStatus::DRAG;
 	}
-	return false;
+	return ObjectStatus::DEFAULT;
 }
 
 void WindowedRectangle::Translate(const Vec2 TranslationDelta) {

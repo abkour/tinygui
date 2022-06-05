@@ -23,18 +23,13 @@ Rectangle::Rectangle(std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc, std::
 	VertexBuffer = pVertexBuffer;
 }
 
-bool Rectangle::Update(const Vec2 CursorPosition, const ClientState pClientState) {
+ObjectStatus Rectangle::Update(const Vec2 CursorPosition, const ClientState pClientState) {
 	Vec2 OffsetOrigin = origin + TranslationVector;
-	/*if (std::abs(CursorPosition.x - OffsetOrigin.x) < dimension.x && std::abs(CursorPosition.y - OffsetOrigin.y) < dimension.y) {
-		TerminateStatus = true;
-		return true;
-	}*/
 	if (CursorPosition.x > OffsetOrigin.x && CursorPosition.x < OffsetOrigin.x + dimension.x 
 		&& CursorPosition.y > OffsetOrigin.y && CursorPosition.y < OffsetOrigin.y + dimension.y) {
-		TerminateStatus = true;
-		return true;
+		return ObjectStatus::TERMINATED;
 	}
-	return false;
+	return ObjectStatus::DEFAULT;
 }
 
 void Rectangle::Translate(const Vec2 TranslationDelta) {

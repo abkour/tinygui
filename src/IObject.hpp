@@ -5,13 +5,17 @@
 
 #include "ClientState.hpp"
 
+enum class ObjectStatus {
+	DEFAULT, // This is a placeholder for now
+	DRAG,
+	TERMINATED
+};
+
 class IObject {
 
 public:
 
 	IObject() = default;
-
-	bool GetTerminateStatus() const { return TerminateStatus; }
 
 	virtual ~IObject() = 0 {}
 
@@ -22,7 +26,7 @@ public:
 	Vec2 GetTranslationVector() const { return TranslationVector; }
 	virtual void Translate(const Vec2 TranslationDelta) = 0 {}
 
-	virtual bool Update(const Vec2 CursorPosition, const ClientState pClientState) = 0 {}
+	virtual ObjectStatus Update(const Vec2 CursorPosition, const ClientState pClientState) = 0 {}
 	virtual void Render(unsigned int shaderID) = 0 {}
 
 	std::list<IObject*> attachedObjects;
@@ -31,5 +35,4 @@ public:
 protected:
 
 	Vec2 TranslationVector;
-	bool TerminateStatus = false;
 };

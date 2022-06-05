@@ -8,7 +8,9 @@ public:
 	RootObject() = default;
 
 	// This sits on top of all other objects
-	virtual bool Update(const Vec2 CursorPosition, const ClientState pClientState) override { return true; }
+	virtual ObjectStatus Update(const Vec2 CursorPosition, const ClientState pClientState) override { 
+		return ObjectStatus::DEFAULT; 
+	}
 	virtual void Render(unsigned int shaderID) {}
 	virtual void Translate(const Vec2 TranslationDelta) {}
 

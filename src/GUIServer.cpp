@@ -71,9 +71,9 @@ int GUIServer::ServerImpl::GenerateId() {
 
 void GUIServer::ServerImpl::UpdateState(IObject* node, const Vec2 CursorPosition, const ClientState pClientState) {
 	for (auto it = node->attachedObjects.begin(); it != node->attachedObjects.end();) {
-		bool IsObjectUpdated = (*it)->Update(CursorPosition, pClientState);
-		if (IsObjectUpdated) {
-			if ((*it)->GetTerminateStatus()) {
+		ObjectStatus objectStatus = (*it)->Update(CursorPosition, pClientState);
+		if (objectStatus != ObjectStatus::DEFAULT) {
+			if (objectStatus == ObjectStatus::TERMINATED) {
 				it = node->attachedObjects.erase(it);
 			} else {
 				++it;
