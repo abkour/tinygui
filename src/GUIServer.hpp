@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "ClientState.hpp"
+#include "Texture2D.hpp"
 
 class GUIServer {
 
@@ -24,8 +25,18 @@ public:
 	GUIServer(GLFWwindow* window);
 	~GUIServer();
 
-	unsigned int CreateRectangle(const Vec2 pos, const Vec2 dim, unsigned int attachId);
-	unsigned int CreateWindowedRectangle(const Vec2 pos, const Vec2 dimBody, const Vec2 dimHead, unsigned int attachId);
+	unsigned int CreateRectangle(	const Vec2 pos, 
+									const Vec2 dim, 
+									unsigned int attachId, 
+									const unsigned int textureID);
+
+	unsigned int CreateWindowedRectangle(	const Vec2 pos, 
+											const Vec2 dimBody, 
+											const Vec2 dimHead, 
+											unsigned int attachId, 
+											const unsigned int textureID);
+
+	unsigned int LoadTexture(const char* texturePath);
 
 	void UpdateState(const Vec2 CursorPos, const ClientState pClientState);
 	void Render();

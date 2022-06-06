@@ -12,7 +12,8 @@ public:
 	IVertexBuffer() = default;
 	virtual ~IVertexBuffer() = 0 {}
 
+	virtual void AllocateSpace(const std::size_t size, VertexBufferUsage Usage) = 0 {}
 	virtual void Bind() = 0 {}
-	virtual void Initialize(int Size, void* Source, VertexBufferUsage Usage) = 0 {}
+	virtual void SubInitialize(int Offset, int Size, void* Source) = 0 {}
 
 };

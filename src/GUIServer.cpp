@@ -1,5 +1,8 @@
 #include "GUIServer.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <../ext/stb_image.h>
+
 #include "IObject.hpp"
 #include "RootObject.hpp"
 
@@ -12,12 +15,21 @@
 #include "Rectangle.hpp"
 #include "WindowedRectangle.hpp"
 
+#include "Texture2D_Opengl.hpp"
 #include "VertexBufferDesc_OpenGL.hpp"
 #include "VertexBuffer_OpenGL.hpp"
 
 struct GUIServer::ServerImpl {
 
 	ServerImpl();
+
+public:
+
+	// Texture
+	std::vector<std::shared_ptr<ITexture2D>> Textures;
+	std::shared_ptr<ITexture2D>* FindTextureByID(const int ID);
+
+public:
 
 	GLFWwindow* glfwWindow;
 	ShaderWrapper uberShader;
@@ -64,6 +76,16 @@ IObject* GUIServer::ServerImpl::FindObjectById(const unsigned int id, IObject* n
 	return nullptr;
 }
 
+std::shared_ptr<ITexture2D>* GUIServer::ServerImpl::FindTextureByID(const int ID) {
+	for (auto&& texture : Textures) {
+		if (texture->GetTextureID() == ID) {
+			return &texture;
+		}
+	}
+	return nullptr;
+}
+
+
 int GUIServer::ServerImpl::GenerateId() {
 	reservedIds++;
 	return reservedIds;
@@ -105,32 +127,79 @@ GUIServer::GUIServer(GLFWwindow* window) {
 
 GUIServer::~GUIServer() {}
 
-unsigned int GUIServer::CreateRectangle(const Vec2 pos, const Vec2 dim, unsigned int attachId) {
+unsigned int GUIServer::CreateRectangle(const Vec2 pos, 
+										const Vec2 dim, 
+										unsigned int attachId, 
+										const unsigned int textureID) 
+{
 	auto node = sImpl->FindObjectById(attachId, sImpl->root);
 	// If node is nullptr, the user must have provided a bad id. Do nothing in that case
 	if (node != nullptr) {
 		std::shared_ptr<VertexBufferDesc_OpenGL> VertexBufferDesc = std::make_shared<VertexBufferDesc_OpenGL>();
 		std::shared_ptr<VertexBuffer_OpenGL> VertexBuffer = std::make_shared<VertexBuffer_OpenGL>();
+		auto* TexturePtr = sImpl->FindTextureByID(textureID);
+		if (TexturePtr == nullptr) {
+			return 0;
+		}
 
 		unsigned int NewId = sImpl->GenerateId();
-		node->attachedObjects.emplace_back(new Rectangle(VertexBufferDesc, VertexBuffer, pos, dim, NewId));
+		node->attachedObjects.emplace_back(new Rectangle(VertexBufferDesc, VertexBuffer, *TexturePtr, pos, dim, NewId));
 		return NewId;
 	}
 	return 0;
 }
 
-unsigned int GUIServer::CreateWindowedRectangle(const Vec2 pos, const Vec2 dimBody, const Vec2 dimHead, unsigned int attachId) {
+unsigned int GUIServer::CreateWindowedRectangle(const Vec2 pos, 
+												const Vec2 dimBody, 
+												const Vec2 dimHead, 
+												unsigned int attachId, 
+												const unsigned int textureID) 
+{
 	auto node = sImpl->FindObjectById(attachId, sImpl->root);
 	// If node is nullptr, the user must have provided a bad id. Do nothing in that case
 	if (node != nullptr) {
 		std::shared_ptr<VertexBufferDesc_OpenGL> VertexBufferDesc = std::make_shared<VertexBufferDesc_OpenGL>();
 		std::shared_ptr<VertexBuffer_OpenGL> VertexBuffer = std::make_shared<VertexBuffer_OpenGL>();
-		
+		auto TexturePtr = sImpl->FindTextureByID(textureID);
+		if (TexturePtr == nullptr) {
+			return 0;
+		}
+
 		unsigned int NewId = sImpl->GenerateId();
-		node->attachedObjects.emplace_back(new WindowedRectangle(VertexBufferDesc, VertexBuffer, pos, dimBody, dimHead, NewId));
+		node->attachedObjects.emplace_back(new WindowedRectangle(VertexBufferDesc, VertexBuffer, *TexturePtr, pos, dimBody, dimHead, NewId));
 		return NewId;
 	}
 	return 0;
+}
+
+unsigned int GUIServer::LoadTexture(const char* texturePath) {
+	int width, height, comp;
+	unsigned char* data = stbi_load(texturePath, &width, &height, &comp, 0);
+	if (data == nullptr) {
+		return std::numeric_limits<unsigned int>::max();
+	}
+
+	TextureFormat textureFormat;
+	switch (comp) {
+	case 4:
+		textureFormat = TextureFormat::RGBA;
+		break;
+	default:
+		textureFormat = TextureFormat::RGB;
+		break;
+	}
+
+	std::shared_ptr<Texture2D_OGL> textureID = std::make_shared<Texture2D_OGL>();
+	textureID->Bind();
+	textureID->AllocateSpace(Vec2(width, height), textureFormat);
+	textureID->UpdateContents(data, Vec2(width, height));
+	textureID->GenerateMipmaps();
+	
+	unsigned int textureIDNum = textureID->GetTextureID();
+
+	sImpl->Textures.emplace_back(textureID);
+	
+	return textureIDNum;
 }
 
 void GUIServer::UpdateState(const Vec2 CursorPosition, const ClientState pClientState) {

@@ -2,6 +2,7 @@
 #include "Vec2.hpp"
 #include "IObject.hpp"
 
+#include "Texture2D.hpp"
 #include "VertexBuffer.hpp"
 #include "VertexBufferDesc.hpp"
 
@@ -14,7 +15,12 @@ class Rectangle : public IObject {
 public:
 
 	Rectangle() = default;
-	Rectangle(std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc, std::shared_ptr<IVertexBuffer> pVertexBuffer, const Vec2 origin, const Vec2 dimension, const unsigned int id);
+	Rectangle(	std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc, 
+				std::shared_ptr<IVertexBuffer> pVertexBuffer, 
+				std::shared_ptr<ITexture2D> pTexture2D, 
+				const Vec2 origin, 
+				const Vec2 dimension, 
+				const unsigned int id);
 
 	std::size_t GetVertexCount() const override { return vertexCount; }
 	float* GetVertices() const override { return vertices.get(); }
@@ -30,9 +36,11 @@ protected:
 
 	const std::size_t vertexCount = 6;
 	std::unique_ptr<float[]> vertices;
+	std::unique_ptr<float[]> texCoords;
 
 protected:
 	
+	std::shared_ptr<ITexture2D> Texture;
 	std::shared_ptr<IVertexBufferDesc> VertexBufferDesc;
 	std::shared_ptr<IVertexBuffer> VertexBuffer;
 };

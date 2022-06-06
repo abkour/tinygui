@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 #include "Texture2D.hpp"
 #include <glad/glad.h>
 
@@ -17,6 +17,5 @@ public:
 
 protected:
 
-	int Format;
-	GLuint TextureID;
+	GLuint Format;
 };

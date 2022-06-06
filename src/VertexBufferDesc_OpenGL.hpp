@@ -16,7 +16,7 @@ public:
 		glBindVertexArray(vao);
 	}
 
-	virtual void Initialize(int AttributeIdx, int AttributeComponentCount, AttributeType AttributeType, int Stride, int* Offset) override {
+	virtual void Initialize(int AttributeIdx, int AttributeComponentCount, AttributeType AttributeType, int Stride, void* Offset) override {
 		GLuint glAttributeType = 0;
 		switch (AttributeType) {
 		case AttributeType::TG_FLOAT:

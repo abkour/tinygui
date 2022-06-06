@@ -23,11 +23,11 @@ void Texture2D_OGL::AllocateSpace(const Vec2& TextureDimensions, TextureFormat& 
 		break;
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, Format, TextureDimensions.x, TextureDimensions.y, 0, Format, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, Format, TextureDimensions.x, TextureDimensions.y, 0, Format, GL_UNSIGNED_BYTE, NULL);
 }
 
 void Texture2D_OGL::UpdateContents(const void* pSource, const Vec2& pTextureDimensions) {
-	glTexImage2D(GL_TEXTURE_2D, 0, Format, pTextureDimensions.x, pTextureDimensions.y, 0, Format, GL_FLOAT, pSource);
+	glTexImage2D(GL_TEXTURE_2D, 0, Format, pTextureDimensions.x, pTextureDimensions.y, 0, Format, GL_UNSIGNED_BYTE, pSource);
 }
 
 void Texture2D_OGL::GenerateMipmaps() {

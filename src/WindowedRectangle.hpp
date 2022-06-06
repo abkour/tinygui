@@ -2,6 +2,7 @@
 #include "IObject.hpp"
 #include <memory>
 
+#include "Texture2D.hpp"
 #include "VertexBufferDesc.hpp"
 #include "VertexBuffer.hpp"
 #include "type_io.hpp"
@@ -13,7 +14,13 @@ class WindowedRectangle : public IObject {
 public:
 
 	WindowedRectangle() = default;
-	WindowedRectangle(std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc, std::shared_ptr<IVertexBuffer> pVertexBuffer, const Vec2 originBody, const Vec2 dimensionBody, const Vec2 dimensionHead, const unsigned int id);
+	WindowedRectangle(	std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc, 
+						std::shared_ptr<IVertexBuffer> pVertexBuffer, 
+						std::shared_ptr<ITexture2D> pTexture2D, 
+						const Vec2 originBody, 
+						const Vec2 dimensionBody, 
+						const Vec2 dimensionHead, 
+						const unsigned int id);
 
 	std::size_t GetVertexCount() const override { return vertexCount; }
 	float* GetVertices() const override { return vertices.get(); }
@@ -30,9 +37,11 @@ protected:
 
 	const std::size_t vertexCount = 12;
 	std::unique_ptr<float[]> vertices;
+	std::unique_ptr<float[]> texCoords;
 
 protected:
 
+	std::shared_ptr<ITexture2D> Texture;
 	std::shared_ptr<IVertexBufferDesc> VertexBufferDesc;
 	std::shared_ptr<IVertexBuffer> VertexBuffer;
 };

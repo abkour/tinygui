@@ -12,5 +12,5 @@ public:
 	virtual ~IVertexBufferDesc() = 0 {}
 
 	virtual void Bind() = 0 {}
-	virtual void Initialize(int AttributeIdx, int AttributeComponentCount, AttributeType AttributeType, int Stride, int* Offset) = 0 {}
+	virtual void Initialize(int AttributeIdx, int AttributeComponentCount, AttributeType AttributeType, int Stride, void* Offset) = 0 {}
 };

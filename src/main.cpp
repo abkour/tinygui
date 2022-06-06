@@ -1,12 +1,5 @@
 #pragma once
-#include <glad/glad.h>
-#include <glfw3.h>
-
-#include <iostream>
-#include <stdexcept>
-
 #include "GUIServer.hpp"
-#include "type_io.hpp"
 #include "window.hpp"
 
 int main() {
@@ -14,11 +7,16 @@ int main() {
 
     GUIServer guiServer(windowHandle.GetWindow());
 
-    auto rect1 = guiServer.CreateRectangle(Vec2(-0.9f, -0.9f), Vec2(0.1f, 0.1f), 0);
-    auto rect2 = guiServer.CreateRectangle(Vec2(-0.7f, -0.7f), Vec2(0.1f, 0.1f), 0);
-    auto windowRect1 = guiServer.CreateWindowedRectangle(Vec2(-0.25f, -0.25f), Vec2(0.5, 0.5), Vec2(0.1, 0.1), 0);
-    auto windowRect2 = guiServer.CreateWindowedRectangle(Vec2(0.7f, 0.7f), Vec2(0.1f, 0.1f), Vec2(0.f, 0.1), windowRect1);
-    auto rect4 = guiServer.CreateRectangle(Vec2(0.7f, -0.7f), Vec2(0.1f, 0.1f), windowRect2);
+    const char* jpegSource = "C:\\Users\\flora\\rsc\\textures\\bricks.jpg";
+    const char* pngSource = "C:\\Users\\flora\\rsc\\textures\\test.png";
+    unsigned int jpegTexture = guiServer.LoadTexture(jpegSource);
+    unsigned int pngTexture = guiServer.LoadTexture(pngSource);
+
+    auto rect1 = guiServer.CreateRectangle(Vec2(-0.9f, -0.9f), Vec2(0.1f, 0.1f), 0, jpegTexture);
+    auto rect2 = guiServer.CreateRectangle(Vec2(-0.7f, -0.7f), Vec2(0.1f, 0.1f), 0, jpegTexture);
+    auto windowRect1 = guiServer.CreateWindowedRectangle(Vec2(-0.25f, -0.25f), Vec2(0.5, 0.5), Vec2(0.1, 0.1), 0, pngTexture);
+    auto windowRect2 = guiServer.CreateWindowedRectangle(Vec2(0.7f, 0.7f), Vec2(0.1f, 0.1f), Vec2(0.f, 0.1), windowRect1, pngTexture);
+    auto rect4 = guiServer.CreateRectangle(Vec2(0.4f, -0.4f), Vec2(0.5f, 0.5f), windowRect2, jpegTexture);
 
     while (!glfwWindowShouldClose(windowHandle.GetWindow())) {
         glClearColor(0.f, 0.f, 1.f, 1.f);
@@ -38,5 +36,9 @@ int main() {
 
         glfwSwapBuffers(windowHandle.GetWindow());
         glfwPollEvents();
+
+        if (glfwGetKey(windowHandle.GetWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            glfwSetWindowShouldClose(windowHandle.GetWindow(), GLFW_TRUE);
+        }
     }
 }
