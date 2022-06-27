@@ -12,6 +12,7 @@
 #include <map>
 #include <shaderdirect.hpp>
 
+#include "checkbox.hpp"
 #include "Rectangle.hpp"
 #include "WindowedRectangle.hpp"
 
@@ -38,7 +39,7 @@ public:
 	IObject* FindObjectById(const unsigned int id, IObject* node);
 	int GenerateId();
 
-	void UpdateState(IObject* root, const Vec2 CursorPosition, const ClientState pClientState);
+	void UpdateState(IObject* root, const float2 CursorPosition, const ClientStateManager pClientStateManager);
 	void Render(IObject* root);
 
 private:
@@ -91,9 +92,9 @@ int GUIServer::ServerImpl::GenerateId() {
 	return reservedIds;
 }
 
-void GUIServer::ServerImpl::UpdateState(IObject* node, const Vec2 CursorPosition, const ClientState pClientState) {
+void GUIServer::ServerImpl::UpdateState(IObject* node, const float2 CursorPosition, const ClientStateManager pClientStateManager) {
 	for (auto it = node->attachedObjects.begin(); it != node->attachedObjects.end();) {
-		ObjectStatus objectStatus = (*it)->Update(CursorPosition, pClientState);
+		ObjectStatus objectStatus = (*it)->Update(CursorPosition, pClientStateManager);
 		if (objectStatus != ObjectStatus::DEFAULT) {
 			if (objectStatus == ObjectStatus::TERMINATED) {
 				it = node->attachedObjects.erase(it);
@@ -101,7 +102,7 @@ void GUIServer::ServerImpl::UpdateState(IObject* node, const Vec2 CursorPosition
 				++it;
 			}
 		} else {
-			UpdateState(*it, CursorPosition, pClientState);
+			UpdateState(*it, CursorPosition, pClientStateManager);
 			++it;
 		}
 	}
@@ -127,46 +128,55 @@ GUIServer::GUIServer(GLFWwindow* window) {
 
 GUIServer::~GUIServer() {}
 
-unsigned int GUIServer::CreateRectangle(const Vec2 pos, 
-										const Vec2 dim, 
-										unsigned int attachId, 
-										const unsigned int textureID) 
+void GUIServer::CreateCheckbox(	const float2 pos,
+								const float2 dim,
+								const float3 bg_color,
+								const float3 fg_color,
+								bool initialState,
+								unsigned int attachId) 
+{
+	auto node = sImpl->FindObjectById(attachId, sImpl->root);
+	if (node != nullptr) {
+		std::shared_ptr<VertexBufferDesc_OpenGL> VertexBufferDesc = std::make_shared<VertexBufferDesc_OpenGL>();
+		std::shared_ptr<VertexBuffer_OpenGL> VertexBuffer = std::make_shared<VertexBuffer_OpenGL>();
+	
+		node->attachedObjects.emplace_back(new Checkbox(VertexBufferDesc, VertexBuffer, pos, dim, bg_color, fg_color, initialState));
+	}
+}
+
+unsigned int GUIServer::CreateRectangle(const float2 pos, 
+										const float2 dim,
+										const float3 bg_color,
+										unsigned int attachId) 
 {
 	auto node = sImpl->FindObjectById(attachId, sImpl->root);
 	// If node is nullptr, the user must have provided a bad id. Do nothing in that case
 	if (node != nullptr) {
 		std::shared_ptr<VertexBufferDesc_OpenGL> VertexBufferDesc = std::make_shared<VertexBufferDesc_OpenGL>();
 		std::shared_ptr<VertexBuffer_OpenGL> VertexBuffer = std::make_shared<VertexBuffer_OpenGL>();
-		auto* TexturePtr = sImpl->FindTextureByID(textureID);
-		if (TexturePtr == nullptr) {
-			return 0;
-		}
 
 		unsigned int NewId = sImpl->GenerateId();
-		node->attachedObjects.emplace_back(new Rectangle(VertexBufferDesc, VertexBuffer, *TexturePtr, pos, dim, NewId));
+		node->attachedObjects.emplace_back(new Rectangle(VertexBufferDesc, VertexBuffer, pos, dim, bg_color, NewId));
 		return NewId;
 	}
 	return 0;
 }
 
-unsigned int GUIServer::CreateWindowedRectangle(const Vec2 pos, 
-												const Vec2 dimBody, 
-												const Vec2 dimHead, 
-												unsigned int attachId, 
-												const unsigned int textureID) 
+unsigned int GUIServer::CreateWindowedRectangle(const float2 pos, 
+												const float2 dimBody, 
+												const float2 dimHead,
+												const float3 header_color,
+												const float3 body_color,
+												unsigned int attachId) 
 {
 	auto node = sImpl->FindObjectById(attachId, sImpl->root);
 	// If node is nullptr, the user must have provided a bad id. Do nothing in that case
 	if (node != nullptr) {
 		std::shared_ptr<VertexBufferDesc_OpenGL> VertexBufferDesc = std::make_shared<VertexBufferDesc_OpenGL>();
 		std::shared_ptr<VertexBuffer_OpenGL> VertexBuffer = std::make_shared<VertexBuffer_OpenGL>();
-		auto TexturePtr = sImpl->FindTextureByID(textureID);
-		if (TexturePtr == nullptr) {
-			return 0;
-		}
 
 		unsigned int NewId = sImpl->GenerateId();
-		node->attachedObjects.emplace_back(new WindowedRectangle(VertexBufferDesc, VertexBuffer, *TexturePtr, pos, dimBody, dimHead, NewId));
+		node->attachedObjects.emplace_back(new WindowedRectangle(VertexBufferDesc, VertexBuffer, pos, dimBody, dimHead, header_color, body_color, NewId));
 		return NewId;
 	}
 	return 0;
@@ -191,8 +201,8 @@ unsigned int GUIServer::LoadTexture(const char* texturePath) {
 
 	std::shared_ptr<Texture2D_OGL> textureID = std::make_shared<Texture2D_OGL>();
 	textureID->Bind();
-	textureID->AllocateSpace(Vec2(width, height), textureFormat);
-	textureID->UpdateContents(data, Vec2(width, height));
+	textureID->AllocateSpace(float2(width, height), textureFormat);
+	textureID->UpdateContents(data, float2(width, height));
 	textureID->GenerateMipmaps();
 	
 	unsigned int textureIDNum = textureID->GetTextureID();
@@ -202,8 +212,8 @@ unsigned int GUIServer::LoadTexture(const char* texturePath) {
 	return textureIDNum;
 }
 
-void GUIServer::UpdateState(const Vec2 CursorPosition, const ClientState pClientState) {
-	sImpl->UpdateState(sImpl->root, CursorPosition, pClientState);
+void GUIServer::UpdateState(const float2 CursorPosition, const ClientStateManager pClientStateManager) {
+	sImpl->UpdateState(sImpl->root, CursorPosition, pClientStateManager);
 }
 
 void GUIServer::Render() {

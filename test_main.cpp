@@ -8,11 +8,22 @@
 #include <thread>
 
 #include "applications/frame_time_ui.hpp"
+#include "impl/histogram.hpp"
 
 struct StateOfMouseAtClick {
 	bool mouseClicked;
 	int rect_id;
 };
+
+double round(double d)
+{
+	return floor(d + 0.5);
+}
+
+float foo(float input, float x0, float x1, float y0, float y1) {
+	float slope = 1.0 * (y1 - y0) / (x1 - x0);
+	return y1 + round(slope * (input - y0));
+}
 
 int main() {
 	try {
@@ -96,9 +107,11 @@ int main() {
 
 		std::string helloworld = "hello world";
 
+		TGUIHistogram histogram(2, 50, 0, 30);
+
 		std::cout.sync_with_stdio(false);
 		while (!glfwWindowShouldClose(window.window)) {
-			ftd.timeStart();
+			//ftd.timeStart();
 			glClearColor(0.f, 0.f, 0.f, 0.f);
 			glClear(GL_COLOR_BUFFER_BIT);
 			/*bool cursorMoved = false;
@@ -148,9 +161,12 @@ int main() {
 			glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(int), &defaultRectId);
 			if (nFramesRendered % 1000 == 0) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(16));
-				ftd.timeEnd();
+				//ftd.timeEnd();
 			}
-			ftd.drawFPS();
+			//ftd.drawFPS();
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			histogram.plot(15.f + (rand() % 100) * 0.05);
 
 			glfwSwapBuffers(window.window);
 			glfwPollEvents();

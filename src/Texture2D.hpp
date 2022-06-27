@@ -1,5 +1,5 @@
 #pragma once
-#include "Vec2.hpp"
+#include "float2.hpp"
 #include <cstddef>
 
 enum class TextureFormat {
@@ -14,8 +14,8 @@ public:
 	ITexture2D() = default;
 	virtual ~ITexture2D() = 0 {}
 
-	virtual void AllocateSpace(const Vec2& TextureDimensions, TextureFormat& TextureFormat) = 0;
-	virtual void UpdateContents(const void* pSource, const Vec2& pTextureDimensions) = 0;
+	virtual void AllocateSpace(const float2& TextureDimensions, TextureFormat& TextureFormat) = 0;
+	virtual void UpdateContents(const void* pSource, const float2& pTextureDimensions) = 0;
 	virtual void GenerateMipmaps() = 0;
 	virtual void Bind() = 0;
 	virtual void BindToUnit(const std::size_t pTextureUnit) = 0;

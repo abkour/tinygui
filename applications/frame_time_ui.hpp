@@ -27,7 +27,9 @@ private:
 
 	std::chrono::high_resolution_clock::time_point start, end;
 	double elapsed_time;
-};
 
+	// Histogram
+	
+};
 
 }

@@ -1,30 +1,26 @@
 #pragma once
-#include "float2.hpp"
 #include "float3.hpp"
 #include "IObject.hpp"
-
-#include "Texture2D.hpp"
 #include "VertexBuffer.hpp"
 #include "VertexBufferDesc.hpp"
 
+#include <glad/glad.h>
 #include <memory>
 
-#include <glad/glad.h>
-
-class Rectangle : public IObject {
+class Checkbox : public IObject {
 
 public:
 
-	Rectangle() = default;
-	Rectangle(	std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc, 
+	Checkbox(	std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc,
 				std::shared_ptr<IVertexBuffer> pVertexBuffer,
-				const float2 origin, 
-				const float2 dimension, 
-				const float3 pBackgroundColor,			
-				const unsigned int id);
+				float2 pOrigin, 
+				float2 pDimension,
+				float3 pBackgroundColor,
+				float3 pForegroundColor,
+				bool pInitialState);
 
 	float2 GetTranslationVector() const { return TranslationVector; }
-	
+
 	std::size_t GetVertexCount() const override { return vertexCount; }
 	float* GetVertices() const override { return vertices.get(); }
 
@@ -38,14 +34,18 @@ protected:
 
 	float2 origin;
 	float2 dimension;
-
-	const std::size_t vertexCount = 6;
-	std::unique_ptr<float[]> vertices;
+	bool IsBoxChecked;
 
 	float3 bg_color;
+	float3 fg_color;
 
-protected:
-	
+	// Vertices [0:5] are for the box itself
+	// Vertices [6:9] are for the two lines forming a cross
+	// When rendering the latter 4 vertices are only drawn
+	// if "IsBoxChecked" is true.
+	const std::size_t vertexCount = 10;
+	std::unique_ptr<float[]> vertices;
+
 	std::shared_ptr<IVertexBufferDesc> VertexBufferDesc;
 	std::shared_ptr<IVertexBuffer> VertexBuffer;
 };

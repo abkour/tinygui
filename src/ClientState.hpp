@@ -1,9 +1,9 @@
 #pragma once
-#include "Vec2.hpp"
+#include "float2.hpp"
 
 struct ClientState {
-	Vec2 MouseDelta;
-	Vec2 MousePosition;
+	float2 MouseDelta;
+	float2 MousePosition;
 
 	bool RMB_Down = false;
 	bool LMB_Down = false;
@@ -16,4 +16,13 @@ struct ClientState {
 	bool D_Down = false;
 	bool Esc_Down = false;
 	bool Space_Down = false;
+};
+
+struct ClientStateManager {
+
+	bool LMBPressedThisFrame() const;
+	bool RMBPressedThisFrame() const;
+	void UpdatePreviousState();
+
+	ClientState prevState, currentState;
 };

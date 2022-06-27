@@ -1,4 +1,5 @@
 #pragma once 
+#include "float3.hpp"
 #include "IObject.hpp"
 #include <memory>
 
@@ -16,32 +17,38 @@ public:
 	WindowedRectangle() = default;
 	WindowedRectangle(	std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc, 
 						std::shared_ptr<IVertexBuffer> pVertexBuffer, 
-						std::shared_ptr<ITexture2D> pTexture2D, 
-						const Vec2 originBody, 
-						const Vec2 dimensionBody, 
-						const Vec2 dimensionHead, 
+						const float2 originBody, 
+						const float2 dimensionBody, 
+						const float2 dimensionHead,
+						const float3 pHeaderColor,
+						const float3 pBodyColor,
 						const unsigned int id);
+
+	float2 GetTranslationVector() const { return TranslationVector; }
 
 	std::size_t GetVertexCount() const override { return vertexCount; }
 	float* GetVertices() const override { return vertices.get(); }
 
-	virtual ObjectStatus Update(const Vec2 CursorPosition, const ClientState pClientState) override;
+	virtual ObjectStatus Update(const float2 CursorPosition, const ClientStateManager pClientStateManager) override;
 	virtual void Render(unsigned int shaderID) override;
-	virtual void Translate(const Vec2 TranslationDelta) override;
+	virtual void Translate(const float2 TranslationDelta) override;
 
 protected:
 
-	Vec2 origin;
-	Vec2 dimensionBody;
-	Vec2 dimensionHead;
+	float2 TranslationVector;
+
+	float2 origin;
+	float2 dimensionBody;
+	float2 dimensionHead;
 
 	const std::size_t vertexCount = 12;
 	std::unique_ptr<float[]> vertices;
-	std::unique_ptr<float[]> texCoords;
+
+	float3 header_color;
+	float3 body_color;
 
 protected:
 
-	std::shared_ptr<ITexture2D> Texture;
 	std::shared_ptr<IVertexBufferDesc> VertexBufferDesc;
 	std::shared_ptr<IVertexBuffer> VertexBuffer;
 };

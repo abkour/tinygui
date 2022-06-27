@@ -32,6 +32,28 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	}
 	
+	void* Map(BufferAccessRights Access) override {
+		GLenum gl_access = 0;
+		switch (Access) {
+		case BufferAccessRights::READ_ONLY:
+			gl_access = GL_READ_ONLY;
+			break;
+		case BufferAccessRights::WRITE_ONLY:
+			gl_access = GL_WRITE_ONLY;
+			break;
+		case BufferAccessRights::READ_WRITE:
+			gl_access = GL_READ_WRITE;
+			break;
+		default:
+			break;
+		}
+		return glMapBuffer(GL_ARRAY_BUFFER, gl_access);
+	}
+
+	void Unmap() override {
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+	}
+
 	virtual void SubInitialize(int Offset, int Size, void* Source) override {
 		GLuint glUsage = 0;
 		glBufferSubData(GL_ARRAY_BUFFER, Offset, Size, Source);

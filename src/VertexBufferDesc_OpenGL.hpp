@@ -31,6 +31,9 @@ public:
 		case AttributeType::TG_UNSIGNED_INT:
 			glAttributeType = GL_UNSIGNED_INT;
 			break;
+		case AttributeType::TG_UNSIGNED_BYTE:
+			glAttributeType = GL_UNSIGNED_BYTE;
+			break;
 		default:
 			glAttributeType = GL_NONE;
 			break;

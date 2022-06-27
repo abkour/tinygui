@@ -2,8 +2,8 @@
 #include <glad/glad.h>
 #include <glfw3.h>
 
-#include "Vec2.hpp"
-#include "Vec3.hpp"
+#include "float2.hpp"
+#include "float3.hpp"
 
 #include <memory>
 #include <stdexcept>
@@ -25,19 +25,27 @@ public:
 	GUIServer(GLFWwindow* window);
 	~GUIServer();
 
-	unsigned int CreateRectangle(	const Vec2 pos, 
-									const Vec2 dim, 
-									unsigned int attachId, 
-									const unsigned int textureID);
+	void CreateCheckbox(const float2 pos,
+						const float2 dim,
+						const float3 bg_color,
+						const float3 fg_color,
+						bool initialState,
+						unsigned int attachId);
 
-	unsigned int CreateWindowedRectangle(	const Vec2 pos, 
-											const Vec2 dimBody, 
-											const Vec2 dimHead, 
-											unsigned int attachId, 
-											const unsigned int textureID);
+	unsigned int CreateRectangle(	const float2 pos, 
+									const float2 dim, 
+									const float3 bg_color,
+									unsigned int attachId);
+
+	unsigned int CreateWindowedRectangle(	const float2 pos,
+											const float2 dimBody,
+											const float2 dimHead,
+											const float3 header_color,
+											const float3 body_color,
+											unsigned int attachId);
 
 	unsigned int LoadTexture(const char* texturePath);
 
-	void UpdateState(const Vec2 CursorPos, const ClientState pClientState);
+	void UpdateState(const float2 CursorPos, const ClientStateManager pClientStateManager);
 	void Render();
 };

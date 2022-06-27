@@ -1,8 +1,8 @@
 #version 460 core 
 layout(location = 0) out vec4 FragmentColor;
 
-in vec4 color;
+uniform vec3 graphColor;
 
 void main() {
-    FragmentColor = vec4(color.xyz, 1.f);
+    FragmentColor = vec4(graphColor, 1.f);
 }

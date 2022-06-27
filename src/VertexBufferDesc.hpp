@@ -1,7 +1,7 @@
 #pragma once
 
 enum class AttributeType {
-	TG_FLOAT, TG_DOUBLE, TG_UNSIGNED_INT, TG_INT
+	TG_FLOAT, TG_DOUBLE, TG_UNSIGNED_BYTE, TG_UNSIGNED_INT, TG_INT
 };
 
 class IVertexBufferDesc {
