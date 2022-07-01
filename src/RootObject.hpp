@@ -15,8 +15,4 @@ public:
 	virtual void Translate(const float2 TranslationDelta) {}
 
 	float2 GetTranslationVector() const { return float2(); }
-
-	virtual std::size_t GetVertexCount() const override { return 0; }
-	virtual float* GetVertices() const override { return nullptr; }
-
 };

@@ -1,7 +1,7 @@
 #pragma once
 #include "float2.hpp"
 #include <cstddef>
-#include <list>
+#include <vector>
 
 #include "ClientState.hpp"
 
@@ -21,8 +21,6 @@ public:
 
 	// Getters
 	unsigned int GetId() const { return id; }
-	virtual std::size_t GetVertexCount() const = 0 {}
-	virtual float* GetVertices() const = 0 {}
 	
 	virtual float2 GetTranslationVector() const = 0 {}
 	virtual void Translate(const float2 TranslationDelta) = 0 {}
@@ -30,6 +28,6 @@ public:
 	virtual ObjectStatus Update(const float2 CursorPosition, const ClientStateManager pClientStateManager) = 0 {}
 	virtual void Render(unsigned int shaderID) = 0 {}
 
-	std::list<IObject*> attachedObjects;
+	std::vector<IObject*> attachedObjects;
 	unsigned int id;
 };

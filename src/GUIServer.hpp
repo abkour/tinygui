@@ -12,6 +12,8 @@
 #include "ClientState.hpp"
 #include "Texture2D.hpp"
 
+#include "checkbox.hpp"
+
 class GUIServer {
 
 private:
@@ -25,11 +27,11 @@ public:
 	GUIServer(GLFWwindow* window);
 	~GUIServer();
 
-	void CreateCheckbox(const float2 pos,
+	Checkbox& CreateCheckbox(const float2 pos,
 						const float2 dim,
 						const float3 bg_color,
 						const float3 fg_color,
-						bool initialState,
+						bool* state,
 						unsigned int attachId);
 
 	unsigned int CreateRectangle(	const float2 pos, 

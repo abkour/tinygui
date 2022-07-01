@@ -24,9 +24,6 @@ public:
 				const unsigned int id);
 
 	float2 GetTranslationVector() const { return TranslationVector; }
-	
-	std::size_t GetVertexCount() const override { return vertexCount; }
-	float* GetVertices() const override { return vertices.get(); }
 
 	virtual ObjectStatus Update(const float2 CursorPosition, const ClientStateManager pClientStateManager) override;
 	virtual void Render(GLuint shaderID) override;

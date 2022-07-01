@@ -53,12 +53,13 @@ struct FontEngine::Glyph {
 };
 
 
-FontEngine::FontEngine() {
+FontEngine::FontEngine(const float2 pWindowResolution) 
+	: windowResolution(pWindowResolution)
+{
 	// Enable Alpha blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
 
 	FT_Error error = FT_Init_FreeType(&library);
 	if (error) {
@@ -67,13 +68,14 @@ FontEngine::FontEngine() {
 }
 
 FontEngine::~FontEngine() {
-	glDeleteVertexArrays(1, &atlas_vao);
-	glDeleteBuffers(1, &atlas_vbo);
+	for (int i = 0; i < strings.size(); ++i) {
+		glDeleteVertexArrays(1, &strings[i].vao);
+		glDeleteBuffers(1, &strings[i].vbo);
+	}
 	glDeleteTextures(1, &glyph_atlas);
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 }
-
 
 void FontEngine::InitializeFace(const char* PathToFont, const unsigned PixelSize) {
 	FT_Error error = FT_New_Face(library, PathToFont, 0, &face);
@@ -102,7 +104,6 @@ void FontEngine::MakeAtlas(const int resx, const int resy) {
 
 	unsigned maxLineHeight = 0;
 
-	AtlasPresent = true;
 	for (int i = ' '; i < 'z'; ++i) {
 		auto glyph_index = FT_Get_Char_Index(face, i);
 
@@ -165,25 +166,29 @@ void FontEngine::MakeAtlas(const int resx, const int resy) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
-void FontEngine::MakeGlyphs(const std::string& input, const float2 LeftOffset, const float2 RightOffset) {
-	if(AtlasPresent) {
-		MakeGlyphsFromAtlas(input, LeftOffset, RightOffset);
-	}
-}
+unsigned int FontEngine::MakeString(const std::string& input, const float2 LeftOffset, const float2 RightOffset) {
 
-void FontEngine::MakeGlyphsFromAtlas(const std::string& input, const float2 LeftOffset, const float2 RightOffset) {
-	if (atlas_vbo != 0) {
-		glDeleteBuffers(1, &atlas_vbo);
-		nGlyphsToDraw = 0;
-	}
-	std::vector<float> quadstore(input.size() * 12);
-	std::vector<float> uvstore(input.size() * 12);
+	GLuint string_vao, string_vbo;
+	glGenVertexArrays(1, &string_vao);
+	glBindVertexArray(string_vao);
+	glGenBuffers(1, &string_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, string_vbo);
+	// Number 24 is derived from:
+	// 6 vertices (2 floats each) + 6 uv coords (2 floats each)
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * input.size() * 24, NULL, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(0));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
+
+	float* vertexstore = reinterpret_cast<float*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
 
 	bool bFindWordLength = true;
-	int wordlength2 = 0;
+	int wordlength = 0;
 	int wordpos = LeftOffset.x;
 	int ppos = 0;
 	int pposy = 0;
+	int stringsize = 0;
 	for (int i = 0; i < input.size(); ++i) {
 		auto it = glyphs.find(input[i]);
 
@@ -194,82 +199,167 @@ void FontEngine::MakeGlyphsFromAtlas(const std::string& input, const float2 Left
 				if (input[j] == ' ') {
 					break;
 				} else {
-					auto it2 = glyphs.find(input[j]);
-					wordlength2 += it2->second.advance;
+					auto glyph_it = glyphs.find(input[j]);
+					wordlength += glyph_it->second.advance;
 				}
 			}
 			bFindWordLength = false;
 		}
 		if (input[i] == ' ') {
 			bFindWordLength = true;
-			wordlength2 = 0;
-		}
-
-		if (input[i] == ' ') {
+			wordlength = 0;
 			wordpos = ppos + it->second.advance;
-		} else {
-			if (wordpos + wordlength2 + LeftOffset.x > 1000 - RightOffset.x) {
+		}  else {
+			if (wordpos + wordlength + LeftOffset.x > windowResolution.x - RightOffset.x) {
 				pposy -= maxGlyphHeight * 1.3;
 				wordpos = 0;
 				ppos = 0;
 			}
 		}
-		
-		quadstore[i * 12] = ppos + it->second.bearing.x;
-		quadstore[i * 12 + 1] = pposy + it->second.bearing.y - it->second.dimension.y;
-		quadstore[i * 12 + 2] = ppos + it->second.bearing.x + it->second.dimension.x;
-		quadstore[i * 12 + 3] = pposy + it->second.bearing.y - it->second.dimension.y;
-		quadstore[i * 12 + 4] = ppos + it->second.bearing.x + it->second.dimension.x;
-		quadstore[i * 12 + 5] = pposy + it->second.bearing.y;
-		quadstore[i * 12 + 6] = ppos + it->second.bearing.x;
-		quadstore[i * 12 + 7] = pposy + it->second.bearing.y - it->second.dimension.y;
-		quadstore[i * 12 + 8] = ppos + it->second.bearing.x + it->second.dimension.x;
-		quadstore[i * 12 + 9] = pposy + it->second.bearing.y;
-		quadstore[i * 12 + 10] = ppos + it->second.bearing.x;
-		quadstore[i * 12 + 11] = pposy + it->second.bearing.y;
 
 		auto uvdata = glyphAtlas.texcoords.find(input[i])->second;
-		uvstore[i * 12] = uvdata[0];
-		uvstore[i * 12 + 1] = uvdata[1];
-		uvstore[i * 12 + 2] = uvdata[2];
-		uvstore[i * 12 + 3] = uvdata[3];
-		uvstore[i * 12 + 4] = uvdata[4];
-		uvstore[i * 12 + 5] = uvdata[5];
-		uvstore[i * 12 + 6] = uvdata[6];
-		uvstore[i * 12 + 7] = uvdata[7];
-		uvstore[i * 12 + 8] = uvdata[8];
-		uvstore[i * 12 + 9] = uvdata[9];
-		uvstore[i * 12 + 10] = uvdata[10];
-		uvstore[i * 12 + 11] = uvdata[11];
+		
+		vertexstore[i * 24] = ppos + it->second.bearing.x;
+		vertexstore[i * 24 + 1] = pposy + it->second.bearing.y - it->second.dimension.y;
+		vertexstore[i * 24 + 2] = uvdata[0];
+		vertexstore[i * 24 + 3] = uvdata[1];
+		vertexstore[i * 24 + 4] = ppos + it->second.bearing.x + it->second.dimension.x;
+		vertexstore[i * 24 + 5] = pposy + it->second.bearing.y - it->second.dimension.y;
+		vertexstore[i * 24 + 6] = uvdata[2];
+		vertexstore[i * 24 + 7] = uvdata[3];
+		vertexstore[i * 24 + 8] = ppos + it->second.bearing.x + it->second.dimension.x;
+		vertexstore[i * 24 + 9] = pposy + it->second.bearing.y;
+		vertexstore[i * 24 + 10] = uvdata[4];
+		vertexstore[i * 24 + 11] = uvdata[5];
+		vertexstore[i * 24 + 12] = ppos + it->second.bearing.x;
+		vertexstore[i * 24 + 13] = pposy + it->second.bearing.y - it->second.dimension.y;
+		vertexstore[i * 24 + 14] = uvdata[6];
+		vertexstore[i * 24 + 15] = uvdata[7];
+		vertexstore[i * 24 + 16] = ppos + it->second.bearing.x + it->second.dimension.x;
+		vertexstore[i * 24 + 17] = pposy + it->second.bearing.y;
+		vertexstore[i * 24 + 18] = uvdata[8];
+		vertexstore[i * 24 + 19] = uvdata[9];
+		vertexstore[i * 24 + 20] = ppos + it->second.bearing.x;
+		vertexstore[i * 24 + 21] = pposy + it->second.bearing.y;
+		vertexstore[i * 24 + 22] = uvdata[10];
+		vertexstore[i * 24 + 23] = uvdata[11];
 
 		ppos += it->second.advance;
 
-		nGlyphsToDraw++;
+		stringsize++;
 	}
 	
-	if (atlas_vao == 0) {
-		glGenVertexArrays(1, &atlas_vao);
-	}
-	glBindVertexArray(atlas_vao);
-	glGenBuffers(1, &atlas_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, atlas_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * (quadstore.size() + uvstore.size()), NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, quadstore.size() * sizeof(float), quadstore.data());
-	glBufferSubData(GL_ARRAY_BUFFER, quadstore.size() * sizeof(float), uvstore.size() * sizeof(float), uvstore.data());
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(0));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(quadstore.size() * sizeof(float)));
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+
+	strings.emplace_back(ppos, pposy, stringsize, string_vao, string_vbo);
+	return strings.size() - 1;
 }
 
-void FontEngine::Render(ShaderWrapper& shader, float2 Offset) {
+void FontEngine::AddSubstring(const std::string& substr, const float2 lOffset, const float2 rOffset, const unsigned int idx) {
+	std::vector<float> vertexstore(substr.size() * 24);
+	
+	bool bFindWordLength = true;
+	int wordlength = 0;
+	int wordpos = strings[idx].pposx + lOffset.x;
+	int ppos = strings[idx].pposx;
+	int pposy = strings[idx].pposy;
+
+	for (int i = 0; i < substr.size(); ++i) {
+		auto it = glyphs.find(substr[i]);
+
+		// Find the length in font space of the current character string in order to determine 
+		// whether we should render the character string on a new line or not.
+		if (bFindWordLength && substr[i] != ' ') {
+			for (int j = i; j < substr.size(); ++j) {
+				if (substr[j] == ' ') {
+					break;
+				} else {
+					auto glyph_it = glyphs.find(substr[j]);
+					wordlength += glyph_it->second.advance;
+				}
+			}
+			bFindWordLength = false;
+		}
+		if (substr[i] == ' ') {
+			bFindWordLength = true;
+			wordlength = 0;
+			wordpos = ppos + it->second.advance;
+		} else {
+			if (wordpos + wordlength + lOffset.x > windowResolution.x - rOffset.x) {
+				pposy -= maxGlyphHeight * 1.3;
+				wordpos = 0;
+				ppos = 0;
+			}
+		}
+
+		auto uvdata = glyphAtlas.texcoords.find(substr[i])->second;
+
+		vertexstore[i * 24] = ppos + it->second.bearing.x;
+		vertexstore[i * 24 + 1] = pposy + it->second.bearing.y - it->second.dimension.y;
+		vertexstore[i * 24 + 2] = uvdata[0];
+		vertexstore[i * 24 + 3] = uvdata[1];
+		vertexstore[i * 24 + 4] = ppos + it->second.bearing.x + it->second.dimension.x;
+		vertexstore[i * 24 + 5] = pposy + it->second.bearing.y - it->second.dimension.y;
+		vertexstore[i * 24 + 6] = uvdata[2];
+		vertexstore[i * 24 + 7] = uvdata[3];
+		vertexstore[i * 24 + 8] = ppos + it->second.bearing.x + it->second.dimension.x;
+		vertexstore[i * 24 + 9] = pposy + it->second.bearing.y;
+		vertexstore[i * 24 + 10] = uvdata[4];
+		vertexstore[i * 24 + 11] = uvdata[5];
+		vertexstore[i * 24 + 12] = ppos + it->second.bearing.x;
+		vertexstore[i * 24 + 13] = pposy + it->second.bearing.y - it->second.dimension.y;
+		vertexstore[i * 24 + 14] = uvdata[6];
+		vertexstore[i * 24 + 15] = uvdata[7];
+		vertexstore[i * 24 + 16] = ppos + it->second.bearing.x + it->second.dimension.x;
+		vertexstore[i * 24 + 17] = pposy + it->second.bearing.y;
+		vertexstore[i * 24 + 18] = uvdata[8];
+		vertexstore[i * 24 + 19] = uvdata[9];
+		vertexstore[i * 24 + 20] = ppos + it->second.bearing.x;
+		vertexstore[i * 24 + 21] = pposy + it->second.bearing.y;
+		vertexstore[i * 24 + 22] = uvdata[10];
+		vertexstore[i * 24 + 23] = uvdata[11];
+
+		ppos += it->second.advance;
+	}
+
+	GLuint new_vao, new_vbo;
+	glGenVertexArrays(1, &new_vao);
+	glGenBuffers(1, &new_vbo);
+	glBindVertexArray(new_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, new_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * (vertexstore.size() + strings[idx].length * 24), NULL, GL_STATIC_DRAW);
+	
+	glBindBuffer(GL_COPY_WRITE_BUFFER, new_vbo);
+	glBindBuffer(GL_COPY_READ_BUFFER, strings[idx].vbo);
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, sizeof(float) * strings[idx].length * 24);
+
+	// Copy new contents into new buffer
+	glBindBuffer(GL_ARRAY_BUFFER, new_vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * (strings[idx].length * 24), vertexstore.size() * sizeof(float), vertexstore.data());
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(0));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
+
+	glDeleteVertexArrays(1, &strings[idx].vao);
+	glDeleteBuffers(1, &strings[idx].vbo);
+	
+	strings[idx].vao = new_vao;
+	strings[idx].vbo = new_vbo;;
+	strings[idx].length += substr.size();
+	strings[idx].pposx = ppos;
+	strings[idx].pposy = pposy;
+}
+
+void FontEngine::Render(unsigned int idx, ShaderWrapper& shader, float2 Offset) {
 	shader.bind();
 	shader.upload2fv(&Offset.x, "offset");
 	shader.upload44fm(glm::value_ptr(ortho_projection), "projection");
 	glBindTexture(GL_TEXTURE_2D, glyph_atlas);
 	glBindTextureUnit(0, glyph_atlas);
-	glBindVertexArray(atlas_vao);
-	glDrawArrays(GL_TRIANGLES, 0, nGlyphsToDraw * 6);
+	glBindVertexArray(strings[idx].vao);
+	glDrawArrays(GL_TRIANGLES, 0, strings[idx].length * 6);
 }
 
 void FontEngine::SetProjection(float2 Resolution) {

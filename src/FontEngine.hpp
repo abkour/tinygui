@@ -19,14 +19,32 @@ struct GlyphAtlas {
 
 class FontEngine {
 
+	struct GlyphString {
+
+		GlyphString(int pPposx, int pPposy, int pLength, GLuint pVao, GLuint pVbo)
+			: pposx(pPposx)
+			, pposy(pPposy)
+			, length(pLength)
+			, vao(pVao)
+			, vbo(pVbo)
+		{}
+
+		int pposx, pposy;
+		int length;
+		GLuint vao, vbo;
+	};
+
 public:
 
-	FontEngine();
+	FontEngine(const float2 pWindowResolution);
 
 	void InitializeFace(const char* PathToFont, const unsigned PixelSize);
-	void MakeGlyphs(const std::string& input, const float2 LeftOffset, const float2 RightOffset);
 	
-	void Render(ShaderWrapper& shader, float2 Offset);
+	unsigned int MakeString(const std::string& input, const float2 LeftOffset, const float2 RightOffset);
+	
+	void AddSubstring(const std::string& substr, const float2 lOffset, const float2 rOffset, const unsigned int idx);
+
+	void Render(unsigned int idx, ShaderWrapper& shader, float2 Offset);
 	
 	void SetProjection(float2 Resolution);
 
@@ -36,10 +54,11 @@ public:
 
 protected:
 
-	GLuint atlas_vao;
-	GLuint atlas_vbo;
-	int nGlyphsToDraw = 0;
+	std::vector<GlyphString> strings;
 
+protected:
+
+	float2 windowResolution;
 	glm::mat4 ortho_projection;
 
 	GLuint glyph_atlas;
@@ -54,15 +73,9 @@ protected:
 
 protected:
 
-	void MakeGlyphsFromAtlas(const std::string& input, const float2 LeftOffset, const float2 RightOffset);
-
-protected:
-
 	int maxGlyphHeight;
 
 protected:
 
 	GlyphAtlas glyphAtlas;
-	bool AtlasPresent = false;
-
 };

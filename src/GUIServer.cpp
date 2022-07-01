@@ -128,11 +128,11 @@ GUIServer::GUIServer(GLFWwindow* window) {
 
 GUIServer::~GUIServer() {}
 
-void GUIServer::CreateCheckbox(	const float2 pos,
+Checkbox& GUIServer::CreateCheckbox(	const float2 pos,
 								const float2 dim,
 								const float3 bg_color,
 								const float3 fg_color,
-								bool initialState,
+								bool* state,
 								unsigned int attachId) 
 {
 	auto node = sImpl->FindObjectById(attachId, sImpl->root);
@@ -140,7 +140,8 @@ void GUIServer::CreateCheckbox(	const float2 pos,
 		std::shared_ptr<VertexBufferDesc_OpenGL> VertexBufferDesc = std::make_shared<VertexBufferDesc_OpenGL>();
 		std::shared_ptr<VertexBuffer_OpenGL> VertexBuffer = std::make_shared<VertexBuffer_OpenGL>();
 	
-		node->attachedObjects.emplace_back(new Checkbox(VertexBufferDesc, VertexBuffer, pos, dim, bg_color, fg_color, initialState));
+		node->attachedObjects.emplace_back(new Checkbox(VertexBufferDesc, VertexBuffer, pos, dim, bg_color, fg_color, state));
+		return *dynamic_cast<Checkbox*>(node->attachedObjects.back());
 	}
 }
 

@@ -6,15 +6,21 @@ Checkbox::Checkbox(	std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc,
 					float2 pDimension,
 					float3 pBackgroundColor,
 					float3 pForegroundColor,
-					bool pInitialState) 
+					bool* pState) 
 						: origin(pOrigin)
 						, dimension(pDimension)
 						, bg_color(pBackgroundColor)
 						, fg_color(pForegroundColor)
-						, IsBoxChecked(pInitialState)
+						, IsBoxChecked(pState)
 {
+	// Vertices [0:5] are for the box itself
+	// Vertices [6:9] are for the two lines forming a cross
+	// When rendering the latter 4 vertices are only drawn
+	// if "IsBoxChecked" is true.
+	std::size_t vertexCount = 10;
+
 	this->id = std::numeric_limits<unsigned int>::max();
-	
+
 	pVertexBuffer->Bind();
 	pVertexBuffer->AllocateSpace(sizeof(float) * vertexCount * 6, VertexBufferUsage::STATIC_DRAW);
 	pVertexBufferDesc->Bind();
@@ -24,8 +30,9 @@ Checkbox::Checkbox(	std::shared_ptr<IVertexBufferDesc> pVertexBufferDesc,
 	void* buffer = pVertexBuffer->Map(BufferAccessRights::WRITE_ONLY);
 	float* fbuffer = reinterpret_cast<float*>(buffer);
 
+
 	// Body
-	for (int i = 0; i < vertexCount - 4; ++i) {
+	for (int i = 0; i < 10 - 4; ++i) {
 		fbuffer[2 + i * 6] = bg_color.x;
 		fbuffer[3 + i * 6] = bg_color.y;
 		fbuffer[4 + i * 6] = bg_color.z;
@@ -69,7 +76,7 @@ ObjectStatus Checkbox::Update(const float2 CursorPosition, const ClientStateMana
 		&& CursorPosition.y > OffsetOrigin.y && CursorPosition.y < OffsetOrigin.y + dimension.y) 
 	{
 		if (pClientStateManager.LMBPressedThisFrame()) {
-			IsBoxChecked = !IsBoxChecked;
+			*IsBoxChecked = !(*IsBoxChecked);
 		}
 	}
 	return ObjectStatus::DEFAULT;
@@ -80,10 +87,10 @@ void Checkbox::Render(GLuint shaderID) {
 	VertexBuffer->Bind();
 	glUseProgram(shaderID);
 	glUniform2fv(glGetUniformLocation(shaderID, "translation"), 1, &TranslationVector.x);
-	glDrawArrays(GL_TRIANGLES, 0, vertexCount - 4);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glLineWidth(3);
-	if (IsBoxChecked) {
-		glDrawArrays(GL_LINES, vertexCount - 4, 4);
+	if (*IsBoxChecked) {
+		glDrawArrays(GL_LINES, 6, 4);
 	}
 	glLineWidth(1);
 }
